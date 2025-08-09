@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Symfony\Component\HttpFoundation\Response;
 
 class SetLocale
@@ -14,15 +13,13 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $supportedLocales = config('app.supported_locales');
-        $fallbackLocale = config('app.fallback_locale');
-        $locale = $request->header('lang');
+        $locale = $request->header('lang', $request->user()?->lang);
 
-        if (! in_array($locale, $supportedLocales)) {
-            $locale = $fallbackLocale;
+        if (! in_array($locale, config('app.supported_locales'))) {
+            $locale = config('app.fallback_locale');
         }
 
-        App::setLocale($locale);
+        app()->setLocale($locale);
 
         return $next($request);
     }

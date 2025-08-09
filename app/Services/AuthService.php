@@ -2,14 +2,14 @@
 
 namespace App\Services;
 
-use App\Repositories\UserRepository;
+use App\Repositories\EloquentUserRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthService
 {
     public function __construct(
-        private UserRepository $userRepository
+        private EloquentUserRepository $userRepository
     ) {}
 
     /**
@@ -19,7 +19,7 @@ class AuthService
      */
     public function login(string $email, string $password): array
     {
-        $user = $this->userRepository->findByEmail($email);
+        $user = $this->userRepository->findOneByEmail($email);
 
         if (! $user || ! Hash::check($password, $user->password)) {
             throw ValidationException::withMessages([
@@ -32,7 +32,6 @@ class AuthService
         return [
             'access_token' => $token,
             'token_type' => 'Bearer',
-            'user' => $user,
         ];
     }
 }

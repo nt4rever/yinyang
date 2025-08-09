@@ -3,5 +3,9 @@
     "lang"
   ],
   "i18n-ally.sourceLanguage": "en",
-  "i18n-ally.keystyle": "nested"
+  "i18n-ally.keystyle": "nested",
+  "cSpell.words": [
+    "eloquentfilter",
+    "renderable"
+  ]
 }
