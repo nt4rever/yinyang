@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Models\User;
 use App\Repositories\Interfaces\UserReadRepository;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Cache;
 
 class CacheableUserRepository implements UserReadRepository
@@ -14,7 +13,7 @@ class CacheableUserRepository implements UserReadRepository
     /**
      * Get the cache key prefix
      */
-    protected function getCacheKeyPrefix(): string
+    private function getCacheKeyPrefix(): string
     {
         return config('repository.users.prefix');
     }
@@ -22,9 +21,23 @@ class CacheableUserRepository implements UserReadRepository
     /**
      * Get the cache TTL
      */
-    protected function getCacheTTL(): int
+    private function getCacheTTL(): int
     {
         return config('repository.users.ttl');
+    }
+
+    /**
+     * Retrieve value from cache with callback
+     */
+    private function retrieveFromCache(string $key, callable $callback): mixed
+    {
+        $cache = Cache::remember(
+            $key,
+            $this->getCacheTTL(),
+            fn () => ['value' => $callback()]
+        );
+
+        return $cache['value'];
     }
 
     /**
@@ -32,25 +45,26 @@ class CacheableUserRepository implements UserReadRepository
      */
     public function findOneByEmail(string $email): ?User
     {
-        $cache = Cache::remember(
+        return $this->retrieveFromCache(
             "{$this->getCacheKeyPrefix()}.email.{$email}",
-            $this->getCacheTTL(),
-            fn () => [
-                'value' => $this->userRepository->findOneByEmail($email),
-            ]
+            fn () => $this->userRepository->findOneByEmail($email)
         );
-
-        return $cache['value'];
     }
 
     /**
-     * Find all users
+     * Find user by id
      */
-    public function findAll(int $perPage = 15): LengthAwarePaginator
+    public function findOneById(string $id): ?User
     {
-        throw new \Exception('Not implemented');
+        return $this->retrieveFromCache(
+            "{$this->getCacheKeyPrefix()}.id.{$id}",
+            fn () => $this->userRepository->findOneById($id)
+        );
     }
 
+    /**
+     * Flush specific user from cache
+     */
     public function flush(User $user): void
     {
         Cache::forget("{$this->getCacheKeyPrefix()}.email.{$user->email}");

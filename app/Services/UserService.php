@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\Criteria\Criteria;
 use App\Exceptions\ConflictException;
 use App\Factory\UserFactory;
 use App\Models\User;
 use App\Repositories\CacheableUserRepository;
 use App\Repositories\EloquentUserRepository;
+use Illuminate\Pagination\CursorPaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserService
 {
@@ -29,23 +32,25 @@ class UserService
         $this->userRepository->save($user);
         $this->cacheableUserRepository->flush($user);
 
+        $user->sendEmailVerificationNotification();
+
         return $user;
     }
 
     /**
      * Get all users
      */
-    public function getAll(int $perPage = 15)
+    public function getByCriteria(Criteria $criteria): LengthAwarePaginator
     {
-        return $this->userRepository->findAll($perPage);
+        return $this->userRepository->findByCriteria($criteria);
     }
 
     /**
      * Get users by search phrase
      */
-    public function getBySearchPhrase(?string $searchPhrase, int $perPage = 15)
+    public function getBySearchPhrase(?string $searchPhrase, int $limit = 15): CursorPaginator
     {
-        return $this->userRepository->findBySearchPhrase($searchPhrase, $perPage);
+        return $this->userRepository->findBySearchPhrase($searchPhrase, $limit);
     }
 
     /**

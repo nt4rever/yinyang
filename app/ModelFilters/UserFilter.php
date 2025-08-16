@@ -21,4 +21,20 @@ class UserFilter extends ModelFilter
                 ->orWhere('email', 'LIKE', "%$searchPhrase%");
         });
     }
+
+    /**
+     * Filter by email
+     */
+    public function email(string $email): self
+    {
+        return $this->where('email', $email);
+    }
+
+    /**
+     * Filter by name
+     */
+    public function name(string $name): self
+    {
+        return $this->where('name', $name);
+    }
 }

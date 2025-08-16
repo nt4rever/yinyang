@@ -2,10 +2,18 @@
 
 namespace App\Http\Requests\User;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\AbstractIndexRequest;
 
-class UserIndexRequest extends FormRequest
+class UserIndexRequest extends AbstractIndexRequest
 {
+    /**
+     * Get the allowed sort attributes
+     */
+    protected function getAllowedSortAttributes(): array
+    {
+        return ['id', 'name', 'email', 'created_at', 'updated_at'];
+    }
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -21,9 +29,12 @@ class UserIndexRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'page' => 'nullable|integer|min:1',
-            'per_page' => 'nullable|integer|min:1|max:1000',
-        ];
+        return array_merge(
+            $this->commonRules(),
+            [
+                'name' => 'nullable|string|max:255',
+                'email' => 'nullable|string|max:255',
+            ]
+        );
     }
 }

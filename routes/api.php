@@ -5,9 +5,11 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('login', [AuthController::class, 'login']);
+Route::get('verify-email', [AuthController::class, 'verifyEmail'])->name('verification.verify');
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('profile', [AuthController::class, 'profile']);
+    Route::post('logout', [AuthController::class, 'logout']);
 
     Route::prefix('users')->group(function () {
         Route::get('/', [UserController::class, 'index']);

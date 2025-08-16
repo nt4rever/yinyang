@@ -10,7 +10,7 @@ class UserFactory
     public static function create($name, $email, $password): User
     {
         $user = new User;
-        $user->id = Str::orderedUuid();
+        $user->id = (string) Str::uuid7();
         $user->name = $name;
         $user->email = $email;
         $user->password = $password;

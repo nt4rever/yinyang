@@ -24,7 +24,7 @@ class UserController extends Controller
      */
     public function index(UserIndexRequest $request)
     {
-        $users = $this->userService->getAll($request->integer('per_page', config('eloquentfilter.paginate_limit')));
+        $users = $this->userService->getByCriteria($request->getCriteria());
 
         return new UserCollection($users);
     }
@@ -36,7 +36,7 @@ class UserController extends Controller
     {
         $users = $this->userService->getBySearchPhrase(
             $request->input('search_phrase'),
-            $request->integer('per_page', config('eloquentfilter.paginate_limit'))
+            $request->integer('limit', config('eloquentfilter.paginate_limit'))
         );
 
         return new UserNameListCollection($users);

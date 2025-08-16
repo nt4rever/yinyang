@@ -23,7 +23,7 @@ class UserNameListRequest extends FormRequest
     {
         return [
             'search_phrase' => 'nullable|string|max:255',
-            'per_page' => 'nullable|integer|min:1|max:1000',
+            'limit' => 'nullable|integer|min:1|max:1000',
         ];
     }
 }

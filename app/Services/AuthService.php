@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Repositories\EloquentUserRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AuthService
 {
@@ -27,11 +29,32 @@ class AuthService
             ]);
         }
 
+        if (! $user->hasVerifiedEmail()) {
+            throw ValidationException::withMessages([
+                'email' => [trans('auth.email_not_verified')],
+            ]);
+        }
+
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
             'access_token' => $token,
             'token_type' => 'Bearer',
         ];
+    }
+
+    public function verifyEmail(string $id): void
+    {
+        $user = $this->userRepository->findOneById($id);
+
+        if (! $user) {
+            throw new NotFoundHttpException(trans('User not found.'));
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            throw new BadRequestHttpException(trans('Email already verified.'));
+        }
+
+        $user->markEmailAsVerified();
     }
 }
