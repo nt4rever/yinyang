@@ -1,0 +1,36 @@
+version: 0.0
+os: linux
+files:
+  - source: .
+    destination: /usr/share/nginx/html/laravel
+file_exists_behavior: OVERWRITE
+permissions:
+  - object: /usr/share/nginx/html/laravel
+    owner: nginx
+    group: nginx
+    mode: 644
+    type:
+      - file
+  - object: /usr/share/nginx/html/laravel
+    owner: nginx
+    group: nginx
+    mode: 755
+    type:
+      - directory
+hooks:
+  AfterInstall:
+    - location: hooks/env-generate.sh
+      timeout: 60
+      runas: ec2-user
+    - location: hooks/nginx-restart.sh
+      timeout: 60
+      runas: ec2-user
+    - location: hooks/php-fpm-restart.sh
+      timeout: 60
+      runas: ec2-user
+    - location: hooks/cache-generate.sh
+      timeout: 60
+      runas: ec2-user
+    - location: hooks/supervisord-restart.sh
+      timeout: 60
+      runas: ec2-user

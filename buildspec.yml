@@ -1,0 +1,13 @@
+version: 0.2
+
+# env:
+#   parameter-store:
+#     APP_ENV: "/dev/ec2-web/APP_ENV"
+
+phases:
+  build:
+    commands:
+      - composer install --ignore-platform-reqs
+artifacts:
+  files:
+    - "**/*"
