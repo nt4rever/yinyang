@@ -25,5 +25,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);
+
+        \DB::whenQueryingForLongerThan(100, function ($connection, $query) {
+            \Log::warning('Slow Query Detected', [
+                'sql' => $query->sql,
+                'bindings' => $query->bindings,
+                'time' => $query->time,
+                'connection' => $connection->getName(),
+            ]);
+        });
     }
 }
