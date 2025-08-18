@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
+set -e
 
-sudo chmod -R 777 /usr/share/nginx/html/laravel/storage
-sudo chmod -R 777 /usr/share/nginx/html/laravel/bootstrap/cache
-sudo php /usr/share/nginx/html/laravel/artisan optimize:clear
-sudo php /usr/share/nginx/html/laravel/artisan optimize
-sudo php /usr/share/nginx/html/laravel/artisan migrate --isolated --force
+sudo -u nginx php /usr/share/nginx/html/laravel/artisan optimize:clear
+sudo -u nginx php /usr/share/nginx/html/laravel/artisan optimize
+sudo -u nginx php /usr/share/nginx/html/laravel/artisan migrate --isolated --force
