@@ -13,7 +13,6 @@ sudo sed -i "s|%(ENV_WITH_WORKER)s|${WITH_WORKER:-true}|g" /etc/supervisor/conf.
 
 sudo service supervisord start
 
-sudo crontab -r
 if [ "${WITH_CRON:-true}" = "true" ]; then
-    sudo crontab /usr/share/nginx/html/laravel/deployment/aws/cron.root
+    sudo systemctl restart laravel-schedule.timer
 fi
