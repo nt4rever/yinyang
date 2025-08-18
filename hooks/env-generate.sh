@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-set -e
 
 environment=`env | grep APPLICATION_NAME | cut -c 18-20`
 
