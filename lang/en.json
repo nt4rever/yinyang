@@ -1,4 +1,7 @@
 {
   "Resource not found.": "Resource not found.",
-  "Conflict.": "Conflict."
+  "Conflict.": "Conflict.",
+  "Email already verified.": "Email already verified.",
+  "User not found.": "User not found.",
+  "Invalid signature.": "Invalid signature."
 }

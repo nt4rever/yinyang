@@ -34,6 +34,8 @@ class UserIndexRequest extends AbstractIndexRequest
             [
                 'name' => 'nullable|string|max:255',
                 'email' => 'nullable|string|max:255',
+                'created_at_from' => 'nullable',
+                'created_at_to' => 'nullable',
             ]
         );
     }

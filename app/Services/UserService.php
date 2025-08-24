@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Criteria\Criteria;
 use App\Exceptions\ConflictException;
 use App\Factory\UserFactory;
 use App\Models\User;
@@ -40,9 +39,9 @@ class UserService
     /**
      * Get all users
      */
-    public function getByCriteria(Criteria $criteria): LengthAwarePaginator
+    public function getByFilters(array $filters): LengthAwarePaginator
     {
-        return $this->userRepository->findByCriteria($criteria);
+        return $this->userRepository->findByFilters($filters);
     }
 
     /**

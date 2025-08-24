@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Criteria\Criteria;
 use App\Models\User;
 use App\Repositories\Interfaces\UserReadRepository;
 use App\Repositories\Interfaces\UserWriteRepository;
@@ -32,22 +31,20 @@ class EloquentUserRepository implements UserReadRepository, UserWriteRepository
      */
     public function findBySearchPhrase(?string $searchPhrase, int $limit = 15): CursorPaginator
     {
-        return User::filter(['search_phrase' => $searchPhrase])->latest('id')->cursorPaginate($limit);
+        return User::filter(['search_phrase' => $searchPhrase])
+            ->latest('id')
+            ->cursorPaginate($limit);
     }
 
     /**
      * Find users by criteria with pagination
      */
-    public function findByCriteria(Criteria $criteria): LengthAwarePaginator
+    public function findByFilters(array $filters): LengthAwarePaginator
     {
-        $query = User::filter($criteria->filters);
+        $query = User::filter($filters);
 
-        $query->when(
-            $criteria->sortAttribute,
-            fn ($query) => $query->orderBy($criteria->sortAttribute, $criteria->sortDirection)
-        );
-
-        return $query->latest('id')->paginate($criteria->limit);
+        return $query->latest('id')
+            ->paginate(data_get($filters, 'per_page', config('eloquentfilter.paginate_limit')));
     }
 
     /**

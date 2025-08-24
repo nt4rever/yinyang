@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(120)->by($request->user()?->id ?: $request->ip());
         });
 
-        \DB::whenQueryingForLongerThan(50, function ($connection, $query) {
+        \DB::whenQueryingForLongerThan(100, function ($connection, $query) {
             \Log::warning('Slow Query Detected', [
                 'sql' => $query->sql,
                 'bindings' => $query->bindings,

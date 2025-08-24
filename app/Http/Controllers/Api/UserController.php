@@ -24,7 +24,7 @@ class UserController extends Controller
      */
     public function index(UserIndexRequest $request)
     {
-        $users = $this->userService->getByCriteria($request->getCriteria());
+        $users = $this->userService->getByFilters($request->validated());
 
         return new UserCollection($users);
     }

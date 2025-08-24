@@ -1,4 +1,7 @@
 {
   "Resource not found.": "リソースが見つかりません。",
-  "Conflict.": "競合が発生しました。"
+  "Conflict.": "競合が発生しました。",
+  "Email already verified.": "メールアドレスはすでに確認されています。",
+  "User not found.": "ユーザーが見つかりません。",
+  "Invalid signature.": "無効な署名です。"
 }

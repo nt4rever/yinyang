@@ -3,6 +3,7 @@
 namespace App\ModelFilters;
 
 use EloquentFilter\ModelFilter;
+use Illuminate\Support\Carbon;
 
 class UserFilter extends ModelFilter
 {
@@ -36,5 +37,62 @@ class UserFilter extends ModelFilter
     public function name(string $name): self
     {
         return $this->where('name', $name);
+    }
+
+    /**
+     * Sort by column and direction
+     */
+    public function sort(string $sort): self
+    {
+        $sortCol = explode('|', $sort);
+
+        if (! is_array($sortCol) || count($sortCol) != 2) {
+            return $this;
+        }
+
+        $dir = ($sortCol[1] == 'asc') ? 'asc' : 'desc';
+
+        if ($sortCol[0] == 'name') {
+            return $this->orderByRaw("LOWER(name) {$dir}");
+        }
+
+        // Sort by number
+        // if ($sortCol[0] == 'number') {
+        //     return $this->orderByRaw("REGEXP_REPLACE(number,'[^0-9]+','')+0 " . $dir);
+        // }
+
+        return $this->orderBy($sortCol[0], $dir);
+    }
+
+    /**
+     * Filter by created_at_from
+     */
+    public function createdAtFrom(string $value): self
+    {
+        try {
+            $created_at = is_numeric($value)
+                ? Carbon::createFromTimestamp((int) $value)
+                : Carbon::parse($value);
+
+            return $this->where('created_at', '>=', $created_at);
+        } catch (\Exception $e) {
+            return $this;
+        }
+    }
+
+    /**
+     * Filter by created_at_to
+     */
+    public function createdAtTo(string $value): self
+    {
+        try {
+            $created_at = is_numeric($value)
+                ? Carbon::createFromTimestamp((int) $value)
+                : Carbon::parse($value);
+
+            return $this->where('created_at', '<=', $created_at);
+        } catch (\Exception $e) {
+            return $this;
+        }
     }
 }
