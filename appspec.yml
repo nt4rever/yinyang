@@ -18,17 +18,21 @@ permissions:
     type:
       - directory
 hooks:
+  ApplicationStop:
+    - location: hooks/stop-services.sh
+      timeout: 60
+      runas: ec2-user
   AfterInstall:
     - location: hooks/env-generate.sh
+      timeout: 60
+      runas: ec2-user
+    - location: hooks/cache-generate.sh
       timeout: 60
       runas: ec2-user
     - location: hooks/nginx-restart.sh
       timeout: 60
       runas: ec2-user
     - location: hooks/php-fpm-restart.sh
-      timeout: 60
-      runas: ec2-user
-    - location: hooks/cache-generate.sh
       timeout: 60
       runas: ec2-user
     - location: hooks/supervisord-restart.sh
