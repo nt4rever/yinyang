@@ -29,7 +29,6 @@ class AppServiceProvider extends ServiceProvider
     {
         if (app()->environment() !== 'local') {
             \URL::forceScheme('https');
-            \URL::forceRootUrl(config('app.url'));
         }
 
         Sanctum::usePersonalAccessTokenModel(PersonalAccessToken::class);

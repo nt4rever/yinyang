@@ -21,11 +21,9 @@ class AuthController extends Controller
 
             $this->authService->verifyEmail($request->id);
 
-            // Redirect to login page with success message
-            return redirect()->to('/?success=true');
+            return redirect()->to('/');
         } catch (\Throwable $th) {
-            // Redirect to login page with error message
-            return redirect()->to('/?error=true');
+            return view('laravel-exceptions::403', ['exception' => $th]);
         }
     }
 }
