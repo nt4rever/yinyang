@@ -15,6 +15,7 @@ class VerifyEmailRequest extends FormRequest
     {
         return [
             'id' => ['required', 'uuid', 'max:255'],
+            'hash' => ['required', 'string'],
         ];
     }
 }
