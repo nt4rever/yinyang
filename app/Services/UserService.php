@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Exceptions\ConflictException;
 use App\Factory\UserFactory;
 use App\Models\User;
 use App\Repositories\CacheableUserRepository;
@@ -59,7 +58,7 @@ class UserService
     {
         // Optimistic locking
         if ($user->updated_at?->notEqualTo($data['updated_at'])) {
-            throw new ConflictException;
+            abort(409, trans('Conflict.'));
         }
 
         $user->fill($data);

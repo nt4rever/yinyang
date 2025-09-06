@@ -6,8 +6,6 @@ use App\Events\SendPublicNotification;
 use App\Repositories\EloquentUserRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class AuthService
 {
@@ -51,11 +49,11 @@ class AuthService
         $user = $this->userRepository->findOneById($id);
 
         if (! $user) {
-            throw new NotFoundHttpException(trans('User not found.'));
+            abort(404, trans('User not found.'));
         }
 
         if ($user->hasVerifiedEmail()) {
-            throw new BadRequestHttpException(trans('Email already verified.'));
+            abort(403, trans('Email already verified.'));
         }
 
         $user->markEmailAsVerified();
