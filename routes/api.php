@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('throttle:10,1')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
-    Route::get('verify-email', [AuthController::class, 'verifyEmail'])->name('verification.verify');
 });
 
 Route::middleware('auth:sanctum')->group(function () {
