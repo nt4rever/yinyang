@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\HasAudit;
 use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +16,7 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use Filterable, HasApiTokens, HasFactory, HasUuids, Notifiable, SoftDeletes;
+    use Filterable, HasApiTokens, HasAudit, HasFactory, HasUuids, Notifiable, SoftDeletes;
 
     /**
      * The "type" of the primary key ID.
@@ -42,6 +43,7 @@ class User extends Authenticatable
         'password',
         'lang',
         'timezone',
+        'lock_version',
     ];
 
     /**
@@ -64,6 +66,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'lock_version' => 'integer',
         ];
     }
 

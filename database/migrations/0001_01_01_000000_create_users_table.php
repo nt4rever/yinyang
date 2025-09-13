@@ -20,8 +20,12 @@ return new class extends Migration
             $table->string('lang', 10)->default('en');
             $table->string('timezone', 50)->default('UTC');
             $table->rememberToken();
+            $table->unsignedInteger('lock_version')->default(0);
             $table->timestampsTz();
             $table->softDeletesTz();
+            $table->foreignUuid('created_by')->nullable();
+            $table->foreignUuid('updated_by')->nullable();
+            $table->foreignUuid('deleted_by')->nullable();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

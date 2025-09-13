@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\OptimisticLockException;
 use App\Factory\UserFactory;
 use App\Models\User;
 use App\Repositories\CacheableUserRepository;
@@ -56,12 +57,18 @@ class UserService
      */
     public function update(User $user, array $data): User
     {
-        // Optimistic locking
-        if ($user->updated_at?->notEqualTo($data['updated_at'])) {
-            abort(409, trans('Conflict.'));
+        // Optimistic locking validation
+        if ($user->lock_version !== intval(data_get($data, 'lock_version'))) {
+            throw (new OptimisticLockException)->setModifiedBy($user->updatedBy?->name);
         }
 
         $user->fill($data);
+
+        // Increment lock version if the user is modified
+        if ($user->isDirty()) {
+            $user->lock_version++;
+        }
+
         $this->userRepository->save($user);
         $this->cacheableUserRepository->flush($user);
 

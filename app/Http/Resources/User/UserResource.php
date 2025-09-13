@@ -22,6 +22,7 @@ class UserResource extends JsonResource
             'email_verified_at' => $this->email_verified_at?->toAtomString(),
             'lang' => $this->lang,
             'timezone' => $this->timezone,
+            'lock_version' => $this->lock_version,
             'created_at' => $this->created_at?->toAtomString(),
             'updated_at' => $this->updated_at?->toAtomString(),
         ];
