@@ -25,7 +25,7 @@ class UserUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'updated_at' => 'required|date_format:'.\DateTime::ATOM,
+            'lock_version' => 'required|integer',
             'name' => 'sometimes|required|string|max:255',
             'email' => 'sometimes|required|email|unique:users,email,'.$this->user->id,
             'password' => 'sometimes|required|string|min:8',
