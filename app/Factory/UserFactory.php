@@ -14,6 +14,9 @@ class UserFactory
         $user->name = $name;
         $user->email = $email;
         $user->password = $password;
+        $user->lang = 'en';
+        $user->timezone = 'UTC';
+        $user->lock_version = 0;
 
         return $user;
     }
