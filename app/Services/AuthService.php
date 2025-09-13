@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Events\SendPublicNotification;
+use App\Repositories\CacheableUserRepository;
 use App\Repositories\EloquentUserRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -10,7 +11,8 @@ use Illuminate\Validation\ValidationException;
 class AuthService
 {
     public function __construct(
-        private EloquentUserRepository $userRepository
+        private EloquentUserRepository $userRepository,
+        private CacheableUserRepository $cacheableUserRepository
     ) {}
 
     /**
@@ -57,5 +59,7 @@ class AuthService
         }
 
         $user->markEmailAsVerified();
+
+        $this->cacheableUserRepository->flush($user);
     }
 }
