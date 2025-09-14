@@ -25,7 +25,7 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
         static::updating(function (PersonalAccessToken $personalAccessToken) {
             Cache::tags(CacheKeys::personalAccessTokens())
                 ->remember(
-                    key: CacheKeys::personalAccessTokenByIdAndLastUpdated($personalAccessToken->id),
+                    key: CacheKeys::personalAccessTokenLastUpdatedByIdentifier($personalAccessToken->id),
                     ttl: 60, // 1 minute
                     callback: function () use ($personalAccessToken) {
                         dispatch(new UpdatePersonalAccessToken(
@@ -43,9 +43,9 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
 
         static::deleted(function (PersonalAccessToken $personalAccessToken) {
             Cache::tags(CacheKeys::personalAccessTokens())
-                ->forget(CacheKeys::personalAccessTokenById($personalAccessToken->id));
+                ->forget(CacheKeys::personalAccessTokenByIdentifier($personalAccessToken->id));
             Cache::tags(CacheKeys::personalAccessTokens())
-                ->forget(CacheKeys::personalAccessTokenByToken($personalAccessToken->token));
+                ->forget(CacheKeys::personalAccessTokenByIdentifier($personalAccessToken->token));
         });
     }
 
@@ -94,7 +94,7 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
     {
         $cache = Cache::tags(CacheKeys::personalAccessTokens())
             ->remember(
-                key: CacheKeys::personalAccessTokenById($identifier),
+                key: CacheKeys::personalAccessTokenByIdentifier($identifier),
                 ttl: calculate_cache_ttl(),
                 callback: fn () => [
                     'value' => $callback($identifier),
