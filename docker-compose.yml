@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - '5432:5432'
     networks:
       - yinyang_network
     healthcheck:
@@ -25,7 +25,7 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      - "6379:6379"
+      - '6379:6379'
     networks:
       - yinyang_network
     healthcheck:
@@ -44,8 +44,8 @@ services:
     volumes:
       - minio_data:/data
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - '9000:9000'
+      - '9001:9001'
     networks:
       - yinyang_network
     healthcheck:
@@ -53,6 +53,14 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  mailpit:
+    image: 'axllent/mailpit:latest'
+    ports:
+      - '1025:1025'
+      - '8025:8025'
+    networks:
+      - yinyang_network
 
 volumes:
   postgres_data:

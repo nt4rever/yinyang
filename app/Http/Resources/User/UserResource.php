@@ -25,6 +25,7 @@ class UserResource extends JsonResource
             'lock_version' => $this->lock_version,
             'created_at' => $this->created_at?->toAtomString(),
             'updated_at' => $this->updated_at?->toAtomString(),
+            'avatar_url' => $this->avatar_url,
         ];
     }
 }

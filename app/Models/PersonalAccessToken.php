@@ -39,7 +39,7 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
             return false;
         });
 
-        self::deleted(function (PersonalAccessToken $personalAccessToken) {
+        static::deleted(function (PersonalAccessToken $personalAccessToken) {
             Cache::forget(config('repository.personal_access_tokens.prefix').".{$personalAccessToken->id}");
             Cache::forget(config('repository.personal_access_tokens.prefix').".{$personalAccessToken->token}");
         });

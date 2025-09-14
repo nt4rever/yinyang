@@ -2,13 +2,15 @@
 
 namespace App\Services;
 
-use App\Exceptions\OptimisticLockException;
 use App\Factory\UserFactory;
 use App\Models\User;
 use App\Repositories\CacheableUserRepository;
 use App\Repositories\EloquentUserRepository;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class UserService
 {
@@ -22,18 +24,20 @@ class UserService
      */
     public function create(array $data): User
     {
-        $user = UserFactory::create(
-            $data['name'],
-            $data['email'],
-            $data['password']
-        );
+        return DB::transaction(function () use ($data) {
+            $user = UserFactory::create(
+                $data['name'],
+                $data['email'],
+                $data['password']
+            );
 
-        $this->userRepository->save($user);
-        $this->cacheableUserRepository->flush($user);
+            $this->userRepository->save($user);
+            $this->cacheableUserRepository->flush($user);
 
-        $user->sendEmailVerificationNotification();
+            $user->sendEmailVerificationNotification();
 
-        return $user;
+            return $user;
+        });
     }
 
     /**
@@ -57,22 +61,17 @@ class UserService
      */
     public function update(User $user, array $data): User
     {
-        // Optimistic locking validation
-        if ($user->lock_version !== intval(data_get($data, 'lock_version'))) {
-            throw (new OptimisticLockException)->setModifiedBy($user->updatedBy?->name);
-        }
+        $user->validateOptimisticLock($data);
 
-        $user->fill($data);
+        return DB::transaction(function () use ($user, $data) {
+            $user->fill($data);
+            $user->increaseLockVersion();
 
-        // Increment lock version if the user is modified
-        if ($user->isDirty()) {
-            $user->lock_version++;
-        }
+            $this->userRepository->save($user);
+            $this->cacheableUserRepository->flush($user);
 
-        $this->userRepository->save($user);
-        $this->cacheableUserRepository->flush($user);
-
-        return $user;
+            return $user;
+        });
     }
 
     /**
@@ -80,8 +79,60 @@ class UserService
      */
     public function delete(User $user): bool
     {
-        $this->cacheableUserRepository->flush($user);
+        return DB::transaction(function () use ($user) {
+            $this->deleteOldAvatar($user);
+            $this->userRepository->delete($user);
+            $this->cacheableUserRepository->flush($user);
 
-        return $this->userRepository->delete($user);
+            return true;
+        });
+    }
+
+    /**
+     * Upload an avatar for a user
+     */
+    public function uploadAvatar(User $user, UploadedFile $avatar): User
+    {
+        return DB::transaction(function () use ($user, $avatar) {
+            $path = $avatar->store("avatars/{$user->id}");
+
+            $this->deleteOldAvatar($user);
+
+            $user->avatar_path = $path;
+            $user->increaseLockVersion();
+
+            $this->userRepository->save($user);
+            $this->cacheableUserRepository->flush($user);
+
+            return $user;
+        });
+    }
+
+    /**
+     * Delete an avatar for a user
+     */
+    public function deleteAvatar(User $user): User
+    {
+        return DB::transaction(function () use ($user) {
+            $this->deleteOldAvatar($user);
+
+            $user->avatar_path = null;
+            $user->increaseLockVersion();
+
+            $this->userRepository->save($user);
+            $this->cacheableUserRepository->flush($user);
+
+            return $user;
+        });
+    }
+
+    /**
+     * Delete the old avatar for a user
+     */
+    private function deleteOldAvatar(User $user): void
+    {
+        if ($oldAvatarPath = $user->avatar_path) {
+            dispatch(fn () => Storage::delete($oldAvatarPath))->afterCommit();
+        }
     }
 }
