@@ -7,6 +7,7 @@ use App\Http\Requests\User\UserCreateRequest;
 use App\Http\Requests\User\UserIndexRequest;
 use App\Http\Requests\User\UserNameListRequest;
 use App\Http\Requests\User\UserUpdateRequest;
+use App\Http\Requests\User\UserUploadAvatarRequest;
 use App\Http\Resources\User\UserCollection;
 use App\Http\Resources\User\UserNameListCollection;
 use App\Http\Resources\User\UserResource;
@@ -78,5 +79,45 @@ class UserController extends Controller
         $this->userService->delete($user);
 
         return response()->noContent();
+    }
+
+    /**
+     * Upload an avatar for a user
+     */
+    public function uploadAvatar(UserUploadAvatarRequest $request, User $user)
+    {
+        $user = $this->userService->uploadAvatar($user, $request->file('avatar'));
+
+        return new UserResource($user);
+    }
+
+    /**
+     * Delete an avatar for a user
+     */
+    public function deleteAvatar(User $user)
+    {
+        $user = $this->userService->deleteAvatar($user);
+
+        return new UserResource($user);
+    }
+
+    /**
+     * Upload an avatar for the authenticated user
+     */
+    public function uploadMyAvatar(UserUploadAvatarRequest $request)
+    {
+        $user = $this->userService->uploadAvatar($request->user(), $request->file('avatar'));
+
+        return new UserResource($user);
+    }
+
+    /**
+     * Delete an avatar for the authenticated user
+     */
+    public function deleteMyAvatar()
+    {
+        $user = $this->userService->deleteAvatar(auth()->user());
+
+        return new UserResource($user);
     }
 }

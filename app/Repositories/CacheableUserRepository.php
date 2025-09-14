@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\User;
 use App\Repositories\Interfaces\UserReadRepository;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class CacheableUserRepository implements UserReadRepository
 {
@@ -67,7 +68,9 @@ class CacheableUserRepository implements UserReadRepository
      */
     public function flush(User $user): void
     {
-        Cache::forget("{$this->getCacheKeyPrefix()}.email.{$user->email}");
-        Cache::forget("{$this->getCacheKeyPrefix()}.id.{$user->id}");
+        DB::afterCommit(function () use ($user) {
+            Cache::forget("{$this->getCacheKeyPrefix()}.email.{$user->email}");
+            Cache::forget("{$this->getCacheKeyPrefix()}.id.{$user->id}");
+        });
     }
 }
