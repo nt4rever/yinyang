@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\CacheKeys;
 use App\Jobs\UpdatePersonalAccessToken;
 use App\Repositories\CacheableUserRepository;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -22,26 +23,29 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
         // When updating, cancel normal update and manually update
         // the table asynchronously every 60 seconds.
         static::updating(function (PersonalAccessToken $personalAccessToken) {
-            Cache::remember(
-                config('repository.personal_access_tokens.prefix').".last_usage_updated_at.{$personalAccessToken->id}",
-                60,
-                function () use ($personalAccessToken) {
-                    dispatch(new UpdatePersonalAccessToken(
-                        $personalAccessToken->getTable(),
-                        $personalAccessToken->id,
-                        $personalAccessToken->getDirty()
-                    ));
+            Cache::tags(CacheKeys::personalAccessTokens())
+                ->remember(
+                    key: CacheKeys::personalAccessTokenByIdAndLastUpdated($personalAccessToken->id),
+                    ttl: 60, // 1 minute
+                    callback: function () use ($personalAccessToken) {
+                        dispatch(new UpdatePersonalAccessToken(
+                            $personalAccessToken->getTable(),
+                            $personalAccessToken->id,
+                            $personalAccessToken->getDirty()
+                        ));
 
-                    return now();
-                }
-            );
+                        return now();
+                    }
+                );
 
             return false;
         });
 
         static::deleted(function (PersonalAccessToken $personalAccessToken) {
-            Cache::forget(config('repository.personal_access_tokens.prefix').".{$personalAccessToken->id}");
-            Cache::forget(config('repository.personal_access_tokens.prefix').".{$personalAccessToken->token}");
+            Cache::tags(CacheKeys::personalAccessTokens())
+                ->forget(CacheKeys::personalAccessTokenById($personalAccessToken->id));
+            Cache::tags(CacheKeys::personalAccessTokens())
+                ->forget(CacheKeys::personalAccessTokenByToken($personalAccessToken->token));
         });
     }
 
@@ -88,13 +92,14 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
      */
     public static function retrieveFromCache(string $identifier, callable $callback)
     {
-        $key = config('repository.personal_access_tokens.prefix').".{$identifier}";
-
-        $ttl = config('repository.personal_access_tokens.ttl');
-
-        $cache = Cache::remember($key, $ttl, fn () => [
-            'value' => $callback($identifier),
-        ]);
+        $cache = Cache::tags(CacheKeys::personalAccessTokens())
+            ->remember(
+                key: CacheKeys::personalAccessTokenById($identifier),
+                ttl: calculate_cache_ttl(),
+                callback: fn () => [
+                    'value' => $callback($identifier),
+                ]
+            );
 
         return $cache['value'];
     }

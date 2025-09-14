@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Helpers\CacheKeys;
 use App\Models\User;
 use App\Repositories\Interfaces\UserReadRepository;
 use Illuminate\Support\Facades\Cache;
@@ -12,29 +13,13 @@ class CacheableUserRepository implements UserReadRepository
     public function __construct(private EloquentUserRepository $userRepository) {}
 
     /**
-     * Get the cache key prefix
-     */
-    private function getCacheKeyPrefix(): string
-    {
-        return config('repository.users.prefix');
-    }
-
-    /**
-     * Get the cache TTL
-     */
-    private function getCacheTTL(): int
-    {
-        return config('repository.users.ttl');
-    }
-
-    /**
      * Retrieve value from cache with callback
      */
     private function retrieveFromCache(string $key, callable $callback): mixed
     {
-        $cache = Cache::remember(
+        $cache = Cache::tags(CacheKeys::users())->remember(
             $key,
-            $this->getCacheTTL(),
+            calculate_cache_ttl(),
             fn () => ['value' => $callback()]
         );
 
@@ -47,7 +32,7 @@ class CacheableUserRepository implements UserReadRepository
     public function findOneByEmail(string $email): ?User
     {
         return $this->retrieveFromCache(
-            "{$this->getCacheKeyPrefix()}.email.{$email}",
+            CacheKeys::userByEmail($email),
             fn () => $this->userRepository->findOneByEmail($email)
         );
     }
@@ -58,7 +43,7 @@ class CacheableUserRepository implements UserReadRepository
     public function findOneById(string $id): ?User
     {
         return $this->retrieveFromCache(
-            "{$this->getCacheKeyPrefix()}.id.{$id}",
+            CacheKeys::userById($id),
             fn () => $this->userRepository->findOneById($id)
         );
     }
@@ -69,8 +54,8 @@ class CacheableUserRepository implements UserReadRepository
     public function flush(User $user): void
     {
         DB::afterCommit(function () use ($user) {
-            Cache::forget("{$this->getCacheKeyPrefix()}.email.{$user->email}");
-            Cache::forget("{$this->getCacheKeyPrefix()}.id.{$user->id}");
+            Cache::tags(CacheKeys::users())->forget(CacheKeys::userByEmail($user->email));
+            Cache::tags(CacheKeys::users())->forget(CacheKeys::userById($user->id));
         });
     }
 }
