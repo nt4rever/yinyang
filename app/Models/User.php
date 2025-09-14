@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Helpers\CacheKeys;
 use App\Traits\HasAudit;
 use App\Traits\HasOptimisticLocking;
 use EloquentFilter\Filterable;
@@ -18,8 +19,16 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
+    use Filterable,
+        HasApiTokens,
+        HasAudit,
+        HasOptimisticLocking,
+        HasUuids,
+        Notifiable,
+        SoftDeletes;
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use Filterable, HasApiTokens, HasAudit, HasFactory, HasOptimisticLocking, HasUuids, Notifiable, SoftDeletes;
+    use HasFactory;
 
     /**
      * The "type" of the primary key ID.
@@ -85,13 +94,14 @@ class User extends Authenticatable
     {
         $field ??= $this->getRouteKeyName();
 
-        $key = config('repository.users.prefix').".{$field}.{$value}";
-
-        $ttl = config('repository.users.ttl');
-
-        $cache = Cache::remember($key, $ttl, fn () => [
-            'value' => parent::resolveRouteBinding($value, $field),
-        ]);
+        $cache = Cache::tags(CacheKeys::users())
+            ->remember(
+                key: CacheKeys::userById($value), // TODO: replace with right key
+                ttl: calculate_cache_ttl(),
+                callback: fn () => [
+                    'value' => parent::resolveRouteBinding($value, $field),
+                ]
+            );
 
         return $cache['value'];
     }
