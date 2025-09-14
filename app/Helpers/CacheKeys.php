@@ -24,18 +24,13 @@ class CacheKeys
         return 'personal_access_tokens';
     }
 
-    public static function personalAccessTokenById($id)
+    public static function personalAccessTokenByIdentifier($id)
     {
-        return "personal_access_tokens:id:{$id}";
+        return "personal_access_tokens:{$id}";
     }
 
-    public static function personalAccessTokenByToken($token)
+    public static function personalAccessTokenLastUpdatedByIdentifier($id)
     {
-        return "personal_access_tokens:token:{$token}";
-    }
-
-    public static function personalAccessTokenByIdAndLastUpdated($id)
-    {
-        return "personal_access_tokens:id:{$id}:last_updated";
+        return "personal_access_tokens:{$id}:last_updated";
     }
 }
