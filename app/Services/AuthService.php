@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\SendPublicNotification;
 use App\Repositories\CacheableUserRepository;
 use App\Repositories\EloquentUserRepository;
 use Illuminate\Support\Facades\Hash;
@@ -36,6 +37,8 @@ class AuthService
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        event(new SendPublicNotification('User logged in: '.$user->name));
 
         return [
             'access_token' => $token,
