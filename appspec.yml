@@ -2,16 +2,16 @@ version: 0.0
 os: linux
 files:
   - source: .
-    destination: /usr/share/nginx/html/laravel
+    destination: /usr/share/nginx/html
 file_exists_behavior: OVERWRITE
 permissions:
-  - object: /usr/share/nginx/html/laravel
+  - object: /usr/share/nginx/html
     owner: nginx
     group: nginx
     mode: 644
     type:
       - file
-  - object: /usr/share/nginx/html/laravel
+  - object: /usr/share/nginx/html
     owner: nginx
     group: nginx
     mode: 755
