@@ -4,6 +4,10 @@ x-logging: &default-logging
     max-size: "50m"
     max-file: "10"
     compress: "true"
+x-healthcheck: &default-healthcheck
+  interval: 1s
+  retries: 10
+  timeout: 3s
 
 services:
   laravel:
@@ -22,6 +26,11 @@ services:
       - yinyang_network
     logging:
       <<: *default-logging
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   postgres:
     image: postgres:17-alpine
@@ -39,9 +48,7 @@ services:
       - yinyang_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d yinyang"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      <<: *default-healthcheck
     logging:
       <<: *default-logging
 
@@ -56,9 +63,7 @@ services:
       - yinyang_network
     healthcheck:
       test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      <<: *default-healthcheck
     logging:
       <<: *default-logging
 
@@ -78,9 +83,7 @@ services:
       - yinyang_network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      <<: *default-healthcheck
     logging:
       <<: *default-logging
 
