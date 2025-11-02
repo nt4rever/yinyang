@@ -1,0 +1,45 @@
+#!/usr/bin/env sh
+set -e
+
+container_mode=${CONTAINER_MODE:-"http"}
+running_migrations=${RUNNING_MIGRATIONS:-"false"}
+
+initialStuff() {
+  echo "Container mode: $container_mode"
+
+  if [ "${running_migrations}" = "true" ]; then
+    echo "Running migrations ..."
+    php artisan migrate --isolated --force || php artisan migrate --force
+  fi
+
+  php artisan storage:link
+  php artisan optimize
+}
+
+if [ "$1" != "" ]; then
+  exec "$@"
+elif [ "${container_mode}" = "http" ]; then
+  initialStuff
+  echo "Starting Laravel HTTP server"
+  exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.laravel.conf
+elif [ "${container_mode}" = "horizon" ]; then
+  initialStuff
+  exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.horizon.conf
+elif [ "${container_mode}" = "reverb" ]; then
+  initialStuff
+  exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.reverb.conf
+elif [ "${container_mode}" = "scheduler" ]; then
+  initialStuff
+  exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.scheduler.conf
+elif [ "${container_mode}" = "worker" ]; then
+  if [ -z "${WORKER_COMMAND}" ]; then
+    echo "WORKER_COMMAND is undefined."
+    exit 1
+  fi
+  initialStuff
+  exec /usr/bin/supervisord -n -c /etc/supervisor/conf.d/supervisord.worker.conf
+else
+  echo "Container mode mismatched."
+  exit 1
+fi
+
