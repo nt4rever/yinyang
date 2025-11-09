@@ -13,15 +13,18 @@ services:
   laravel:
     build:
       context: .
-      dockerfile: docker/octane/FrankenPHP.Dockerfile
+      dockerfile: docker/php-fpm/Dockerfile
       args:
         WWWUSER: ${HOST_UID:-1000}
         WWWGROUP: ${HOST_GID:-1000}
     restart: unless-stopped
     env_file:
       - .env
+    volumes:
+      - ./docker/php-fpm/php.dev.ini:/usr/local/etc/php/conf.d/99-php.ini
+      - ./:/var/www/html
     ports:
-      - "8000:8000"
+      - "8000:80"
     networks:
       - yinyang_network
     logging:
