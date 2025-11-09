@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.4
 ARG PHP_VERSION=8.4
 ARG FRANKENPHP_VERSION=1.9
 ARG COMPOSER_VERSION=2.8
@@ -57,17 +58,15 @@ RUN apt-get update; \
     apt-get install -yqq --no-install-recommends --show-progress \
     apt-utils \
     curl \
-    wget \
     nano \
     git \
     unzip \
-    ncdu \
     procps \
     ca-certificates \
     supervisor \
     libsodium-dev \
     && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install nodejs \
+    && apt-get install -y nodejs \
     && install-php-extensions \
     apcu \
     bz2 \
@@ -100,8 +99,7 @@ RUN arch="$(uname -m)" \
     x86) _cronic_fname='supercronic-linux-386' ;; \
     *) echo >&2 "error: unsupported architecture: $arch"; exit 1 ;; \
     esac \
-    && wget -q "https://github.com/aptible/supercronic/releases/download/v0.2.38/${_cronic_fname}" \
-    -O /usr/bin/supercronic \
+    && curl -fsSL "https://github.com/aptible/supercronic/releases/download/v0.2.38/${_cronic_fname}" -o /usr/bin/supercronic \
     && chmod +x /usr/bin/supercronic \
     && mkdir -p /etc/supercronic \
     && echo "*/1 * * * * php ${ROOT}/artisan schedule:run --no-interaction" > /etc/supercronic/laravel
@@ -134,13 +132,13 @@ COPY --link package.json package-lock.json ./
 
 RUN npm ci
 
-COPY --link . .
+COPY --link --chown=${USER_ID}:${GROUP_ID} . .
 
 RUN mkdir -p \
     storage/framework/{sessions,views,cache,testing} \
     storage/logs \
     bootstrap/cache \
-    && chown -R ${USER_ID}:${GROUP_ID} ${ROOT} \
+    && chown -R ${USER_ID}:${GROUP_ID} ${ROOT}/storage ${ROOT}/bootstrap/cache \
     && chmod +x /usr/local/bin/start-container /usr/local/bin/healthcheck
 
 RUN composer dump-autoload \

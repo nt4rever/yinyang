@@ -44,8 +44,17 @@ stop-all: ## Stop all containers
 ps: ## Containers status
 	docker compose ${DC_RUN_ARGS} ps
 
-build: ## Build images
-	docker compose ${DC_RUN_ARGS} build
+# build: ## Build images
+# 	docker compose ${DC_RUN_ARGS} build
+
+build\:laravel: ## Build laravel images
+	DOCKER_BUILDKIT=1 docker buildx build --load \
+  --pull \
+  -f docker/php-fpm/Dockerfile \
+  --cache-to=type=local,dest=/tmp/docker-cache \
+  --cache-from=type=local,src=/tmp/docker-cache \
+  -t yinyang/php-fpm:php8.4 \
+  .
 
 update: ## Update containers
 	docker compose ${DC_RUN_ARGS} up -d --no-deps --build --remove-orphans

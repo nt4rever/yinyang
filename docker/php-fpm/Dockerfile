@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.4
 ARG PHP_VERSION=8.4
 ARG COMPOSER_VERSION=2.8
 
@@ -38,18 +39,16 @@ RUN apt-get update; \
     apt-get install -yqq --no-install-recommends --show-progress \
     apt-utils \
     curl \
-    wget \
     nano \
     git \
     unzip \
-    ncdu \
     procps \
     ca-certificates \
     supervisor \
     nginx \
     libsodium-dev \
     && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install nodejs \
+    && apt-get install -y nodejs \
     && curl -sSLf -o /usr/local/bin/install-php-extensions https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions \
     && chmod +x /usr/local/bin/install-php-extensions \
     && install-php-extensions \
@@ -84,8 +83,7 @@ RUN arch="$(uname -m)" \
     x86) _cronic_fname='supercronic-linux-386' ;; \
     *) echo >&2 "error: unsupported architecture: $arch"; exit 1 ;; \
     esac \
-    && wget -q "https://github.com/aptible/supercronic/releases/download/v0.2.38/${_cronic_fname}" \
-    -O /usr/bin/supercronic \
+    && curl -fsSL "https://github.com/aptible/supercronic/releases/download/v0.2.38/${_cronic_fname}" -o /usr/bin/supercronic \
     && chmod +x /usr/bin/supercronic \
     && mkdir -p /etc/supercronic \
     && echo "*/1 * * * * php ${ROOT}/artisan schedule:run --no-interaction" > /etc/supercronic/laravel
@@ -104,7 +102,6 @@ COPY --link docker/php-fpm/healthcheck /usr/local/bin/healthcheck
 COPY --link docker/php-fpm/php.ini ${PHP_INI_DIR}/conf.d/99-php.ini
 COPY --link docker/php-fpm/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
 COPY --link docker/php-fpm/nginx.conf /etc/nginx/nginx.conf
-COPY --link docker/php-fpm/nginx.default.conf /etc/nginx/conf.d/default.conf
 COPY --link composer.* ./
 
 RUN composer install \
@@ -120,18 +117,15 @@ COPY --link package.json package-lock.json ./
 
 RUN npm ci
 
-COPY --link . .
+COPY --link --chown=${USER_ID}:${GROUP_ID} . .
 
 RUN mkdir -p \
     storage/framework/{sessions,views,cache,testing} \
     storage/logs \
     bootstrap/cache \
-    /var/lib/nginx \
-    /var/cache/nginx \
-    /var/log/nginx \
-    /run/nginx \
-    && chown -R ${USER_ID}:${GROUP_ID} ${ROOT} \
-    && chown -R ${USER_ID}:${GROUP_ID} /var/lib/nginx /var/cache/nginx /var/log/nginx /run/nginx \
+    /var/lib/nginx /var/cache/nginx /var/log/nginx /run/nginx \
+    && chown -R ${USER_ID}:${GROUP_ID} ${ROOT}/storage ${ROOT}/bootstrap/cache \
+    /var/lib/nginx /var/cache/nginx /var/log/nginx /run/nginx \
     && chmod +x /usr/local/bin/start-container /usr/local/bin/healthcheck
 
 RUN composer dump-autoload \

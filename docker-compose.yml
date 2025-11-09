@@ -11,12 +11,7 @@ x-healthcheck: &default-healthcheck
 
 services:
   laravel:
-    build:
-      context: .
-      dockerfile: docker/php-fpm/Dockerfile
-      args:
-        WWWUSER: ${HOST_UID:-1000}
-        WWWGROUP: ${HOST_GID:-1000}
+    image: yinyang/php-fpm:php8.4
     restart: unless-stopped
     env_file:
       - .env
