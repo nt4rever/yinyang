@@ -138,7 +138,9 @@ RUN mkdir -p \
     storage/framework/{sessions,views,cache,testing} \
     storage/logs \
     bootstrap/cache \
-    && chown -R ${USER_ID}:${GROUP_ID} ${ROOT}/storage ${ROOT}/bootstrap/cache \
+    ${ROOT}/.data \
+    ${ROOT}/.config \
+    && chown -R ${USER_ID}:${GROUP_ID} ${ROOT}/storage ${ROOT}/bootstrap/cache ${ROOT}/.data ${ROOT}/.config \
     && chmod +x /usr/local/bin/start-container /usr/local/bin/healthcheck
 
 RUN composer dump-autoload \
