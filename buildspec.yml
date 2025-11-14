@@ -1,23 +1,71 @@
 version: 0.2
 
 phases:
-  install:
-    runtime-versions:
-      php: 8.2
-      nodejs: 22
-    commands:
-      - composer install --ignore-platform-reqs
-      - npm install
   pre_build:
     commands:
-      - chmod +x ./scripts/env-build-generate.sh
-      - ./scripts/env-build-generate.sh
+      # Log in to ECR
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${IMAGE_TAG:-latest}
+
   build:
     commands:
-      - npm run build
+      # Build Docker image
+      - echo Build started on `date`
+      - echo Building the Docker image...
+      - |
+        DOCKER_BUILDKIT=1 docker build \
+          --pull \
+          -f docker/octane/FrankenPHP.Dockerfile \
+          --build-arg PHP_VERSION=8.4 \
+          --build-arg FRANKENPHP_VERSION=1.9 \
+          --build-arg COMPOSER_VERSION=2.8 \
+          --build-arg USER_ID=1000 \
+          --build-arg GROUP_ID=1000 \
+          -t $REPOSITORY_URI:$IMAGE_TAG \
+          .
+      - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:$COMMIT_HASH
+
   post_build:
     commands:
-      - rm -f .env
+      # Push image to ECR
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - docker push $REPOSITORY_URI:$COMMIT_HASH
+
+      # Create artifacts for CodeDeploy blue-green deployment
+      - echo Creating appspec.yaml...
+      - |
+        cat > appspec.yaml <<EOF
+              version: 0.0
+              Resources:
+                - TargetService:
+                    Type: AWS::ECS::Service
+                    Properties:
+                      TaskDefinition: <TASK_DEFINITION>
+                      LoadBalancerInfo:
+                        ContainerName: "$CONTAINER_NAME"
+                        ContainerPort: $CONTAINER_PORT
+              # https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#appspec-hooks-ecs
+              # Hooks:
+                # - BeforeInstall:
+                #     - location: ./hooks/before-install.sh
+                #     - runAs: root
+                # - AfterInstall:
+                #     - location: ./hooks/after-install.sh
+                #     - runAs: root
+                # - BeforeAllowTraffic:
+                #     - location: ./hooks/before-allow-traffic.sh
+                #     - runAs: root
+              EOF
+      - echo AppSpec artifact created
+      - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
+      - echo Image detail artifact created
+
 artifacts:
   files:
-    - "**/*"
+    - appspec.yaml
+    - imageDetail.json
