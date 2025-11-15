@@ -1,0 +1,20 @@
+version: 0.0
+Resources:
+  - TargetService:
+      Type: AWS::ECS::Service
+      Properties:
+        TaskDefinition: <TASK_DEFINITION>
+        LoadBalancerInfo:
+          ContainerName: ""
+          ContainerPort: 
+# https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html\#appspec-hooks-ecs
+# Hooks:
+#   - BeforeInstall:
+#       - location: ./hooks/before-install.sh
+#       - runAs: root
+#   - AfterInstall:
+#       - location: ./hooks/after-install.sh
+#       - runAs: root
+#   - BeforeAllowTraffic:
+#       - location: ./hooks/before-allow-traffic.sh
+#       - runAs: root

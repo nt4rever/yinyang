@@ -44,27 +44,22 @@ phases:
       - echo Creating appspec.yaml...
       - |
         cat > appspec.yaml <<EOF
-              version: 0.0
-              Resources:
-                - TargetService:
-                    Type: AWS::ECS::Service
-                    Properties:
-                      TaskDefinition: <TASK_DEFINITION>
-                      LoadBalancerInfo:
-                        ContainerName: "$CONTAINER_NAME"
-                        ContainerPort: $CONTAINER_PORT
-              # https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#appspec-hooks-ecs
-              # Hooks:
-                # - BeforeInstall:
-                #     - location: ./hooks/before-install.sh
-                #     - runAs: root
-                # - AfterInstall:
-                #     - location: ./hooks/after-install.sh
-                #     - runAs: root
-                # - BeforeAllowTraffic:
-                #     - location: ./hooks/before-allow-traffic.sh
-                #     - runAs: root
-              EOF
+        version: 0.0
+        Resources:
+          - TargetService:
+              Type: AWS::ECS::Service
+              Properties:
+                TaskDefinition: <TASK_DEFINITION>
+                LoadBalancerInfo:
+                  ContainerName: "$CONTAINER_NAME"
+                  ContainerPort: $CONTAINER_PORT
+        # https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#appspec-hooks-ecs
+        Hooks:
+          - BeforeInstall:
+              - location: ./hooks/ecs-install.sh
+                timeout: 60
+                runAs: ec2-user
+        EOF
       - echo AppSpec artifact created
       - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
       - echo Image detail artifact created
