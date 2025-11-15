@@ -54,11 +54,6 @@ phases:
                   ContainerName: "$CONTAINER_NAME"
                   ContainerPort: $CONTAINER_PORT
         # https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#appspec-hooks-ecs
-        Hooks:
-          - BeforeInstall:
-              - location: ./hooks/ecs-install.sh
-                timeout: 60
-                runAs: ec2-user
         EOF
       - echo AppSpec artifact created
       - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
