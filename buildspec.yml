@@ -16,7 +16,7 @@ phases:
       - echo Build started on `date`
       - echo Building the Docker image...
       - |
-        DOCKER_BUILDKIT=1 docker build \
+        DOCKER_BUILDKIT=1 docker buildx build --load \
           --pull \
           -f docker/octane/FrankenPHP.Dockerfile \
           --build-arg PHP_VERSION=8.4 \
@@ -24,6 +24,8 @@ phases:
           --build-arg COMPOSER_VERSION=2.8 \
           --build-arg USER_ID=1000 \
           --build-arg GROUP_ID=1000 \
+          --cache-to=type=registry,ref=$REPOSITORY_URI:buildcache,mode=max \
+          --cache-from=type=registry,ref=$REPOSITORY_URI:buildcache \
           -t $REPOSITORY_URI:$IMAGE_TAG \
           .
       - docker tag $REPOSITORY_URI:$IMAGE_TAG $REPOSITORY_URI:$COMMIT_HASH
