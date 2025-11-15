@@ -40,7 +40,17 @@ phases:
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - docker push $REPOSITORY_URI:$COMMIT_HASH
 
+      # Create image definitions file for horizon rollout deployment
+      - echo Creating image definitions file...
+      - printf '[{"name":"%s","imageUri":"%s"}]' "$HORIZON_CONTAINER_NAME" "$REPOSITORY_URI:$IMAGE_TAG" > imagedefinitions.json
+
       # Create artifacts for CodeDeploy blue-green deployment
+      - echo Creating taskdef.json...
+      - |
+        aws ecs describe-task-definition --task-definition $TASK_DEFINITION_FAMILY |
+          jq '.taskDefinition' |
+          jq 'del(.taskDefinitionArn,.revision,.registeredAt,.registeredBy,.requiresAttributes)' |
+          jq '.containerDefinitions[0].image = "'"$REPOSITORY_URI:$IMAGE_TAG"'"' > taskdef.json
       - echo Creating appspec.yaml...
       - |
         cat > appspec.yaml <<EOF
@@ -56,10 +66,9 @@ phases:
         # https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-hooks.html#appspec-hooks-ecs
         EOF
       - echo AppSpec artifact created
-      - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imageDetail.json
-      - echo Image detail artifact created
 
 artifacts:
   files:
+    - taskdef.json
     - appspec.yaml
-    - imageDetail.json
+    - imagedefinitions.json
