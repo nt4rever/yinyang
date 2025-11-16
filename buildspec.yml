@@ -42,7 +42,7 @@ phases:
 
       # Create image definitions file for horizon rollout deployment
       - echo Creating image definitions file...
-      - printf '[{"name":"%s","imageUri":"%s"}]' "$HORIZON_CONTAINER_NAME" "$REPOSITORY_URI:$IMAGE_TAG" > imagedefinitions.json
+      - printf '[{"name":"%s","imageUri":"%s"}]' "$HORIZON_CONTAINER_NAME" "$REPOSITORY_URI:$COMMIT_HASH" > imagedefinitions.json
 
       # Create artifacts for CodeDeploy blue-green deployment
       - echo Creating taskdef.json...
@@ -50,7 +50,7 @@ phases:
         aws ecs describe-task-definition --task-definition $TASK_DEFINITION_FAMILY |
           jq '.taskDefinition' |
           jq 'del(.taskDefinitionArn,.revision,.registeredAt,.registeredBy,.requiresAttributes)' |
-          jq '.containerDefinitions[0].image = "'"$REPOSITORY_URI:$IMAGE_TAG"'"' > taskdef.json
+          jq '.containerDefinitions[0].image = "'"$REPOSITORY_URI:$COMMIT_HASH"'"' > taskdef.json
       - echo Creating appspec.yaml...
       - |
         cat > appspec.yaml <<EOF

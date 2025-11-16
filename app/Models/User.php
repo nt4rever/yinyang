@@ -112,7 +112,7 @@ class User extends Authenticatable
     protected function avatarUrl(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->avatar_path ? Storage::temporaryUrl($this->avatar_path, now()->addDays(7)) : null,
+            get: fn () => $this->avatar_path ? Storage::url($this->avatar_path) : null,
         );
     }
 }
