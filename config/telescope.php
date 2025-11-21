@@ -116,10 +116,12 @@ return [
         'livewire*',
         'nova-api*',
         'pulse*',
+        'health',
     ],
 
     'ignore_commands' => [
-        //
+        'horizon:status',
+        'octane:status',
     ],
 
     /*
