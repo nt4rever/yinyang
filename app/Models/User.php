@@ -15,11 +15,15 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
+use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
+
+use function Illuminate\Events\queueable;
 
 class User extends Authenticatable
 {
-    use Filterable,
+    use Billable,
+        Filterable,
         HasApiTokens,
         HasAudit,
         HasOptimisticLocking,
@@ -81,6 +85,18 @@ class User extends Authenticatable
             'password' => 'hashed',
             'lock_version' => 'integer',
         ];
+    }
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::updated(queueable(function (User $customer) {
+            if ($customer->hasStripeId()) {
+                $customer->syncStripeCustomerDetails();
+            }
+        }));
     }
 
     /**

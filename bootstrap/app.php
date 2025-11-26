@@ -20,6 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->throttleApi('api', true);
         $middleware->trustProxies(at: '*');
+        $middleware->validateCsrfTokens(except: [
+            'stripe/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->renderable(function (NotFoundHttpException $e, Request $request) {

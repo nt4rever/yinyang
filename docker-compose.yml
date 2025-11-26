@@ -95,6 +95,14 @@ services:
     logging:
       <<: *default-logging
 
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    command: ["listen", "--forward-to", "host.docker.internal:8000/stripe/webhook", "--api-key", "${STRIPE_SECRET}"]
+    networks:
+      - yinyang_network
+    logging:
+      <<: *default-logging
+
 volumes:
   postgres_data:
     driver: local
