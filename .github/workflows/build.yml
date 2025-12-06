@@ -1,0 +1,28 @@
+name: Build ARM64 image
+on: [push]
+jobs:
+  build:
+    runs-on:
+      - codebuild-yinyang-arm64-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        run: |
+          docker buildx build --load \
+            --pull \
+            --platform linux/arm64 \
+            -f docker/octane/FrankenPHP.Dockerfile \
+            -t yinyang/frankenphp:php8.4-arm64 \
+            .
+      - name: Verify build image
+        run: |
+          echo "Checking image exists..."
+          docker images | grep yinyang/frankenphp || (echo "Image not found!" && exit 1)
+          echo "Checking architecture..."
+          ARCH=$(docker inspect yinyang/frankenphp:php8.4-arm64 --format '{{.Architecture}}')
+          echo "Architecture: $ARCH"
