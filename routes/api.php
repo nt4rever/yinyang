@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\UploadfileController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,5 +24,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('{user}', [UserController::class, 'destroy'])->whereUuid('user');
         Route::post('{user}/upload-avatar', [UserController::class, 'uploadAvatar'])->whereUuid('user');
         Route::delete('{user}/delete-avatar', [UserController::class, 'deleteAvatar'])->whereUuid('user');
+    });
+
+    Route::prefix('uploadfiles')->group(function () {
+        Route::get('temporary-upload-url', [UploadfileController::class, 'temporaryUploadUrl']);
+        Route::post('/', [UploadfileController::class, 'store']);
     });
 });
