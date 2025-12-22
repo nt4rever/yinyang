@@ -70,6 +70,7 @@ RUN apt-get update; \
     rdkafka \
     ffi \
     ldap \
+    xdebug \
     && apt-get -y autoremove \
     && apt-get clean \
     && docker-php-source delete \
