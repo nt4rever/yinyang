@@ -29,5 +29,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('uploadfiles')->group(function () {
         Route::get('temporary-upload-url', [UploadfileController::class, 'temporaryUploadUrl']);
         Route::post('/', [UploadfileController::class, 'store']);
+        Route::prefix('multipart-upload')->group(function () {
+            Route::post('init', [UploadfileController::class, 'createMultipartUpload']);
+            Route::post('presigned-url', [UploadfileController::class, 'multipartPresignedUrl']);
+            Route::post('complete', [UploadfileController::class, 'completeMultipartUpload']);
+            Route::post('abort', [UploadfileController::class, 'abortMultipartUpload']);
+        });
     });
 });
