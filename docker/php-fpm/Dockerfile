@@ -22,7 +22,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     WITH_SCHEDULER=false \
     WITH_REVERB=false
 
-ENV XDG_CONFIG_HOME=${ROOT}/.config XDG_DATA_HOME=${ROOT}/.data
+# ENV XDG_CONFIG_HOME=${ROOT}/.config XDG_DATA_HOME=${ROOT}/.data
 
 WORKDIR ${ROOT}
 
