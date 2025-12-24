@@ -3,8 +3,8 @@
 namespace Tests\Unit\Helpers;
 
 use App\Helpers\CacheKeys;
-use PHPUnit\Framework\TestCase;
 use Illuminate\Support\Str;
+use PHPUnit\Framework\TestCase;
 
 class CacheKeysTest extends TestCase
 {
