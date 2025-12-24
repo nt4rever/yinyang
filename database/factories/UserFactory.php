@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\AccountProvider;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -27,7 +29,6 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
     }
@@ -40,5 +41,18 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * Indicate that the user has a local account.
+     */
+    public function withLocalAccount(): static
+    {
+        return $this->afterCreating(function (User $user) {
+            $user->accounts()->create([
+                'provider' => AccountProvider::LOCAL,
+                'password' => static::$password ??= Hash::make('password'),
+            ]);
+        });
     }
 }

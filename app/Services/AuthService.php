@@ -23,7 +23,7 @@ class AuthService
     {
         $user = $this->userRepository->findOneByEmail($email);
 
-        if (! $user || ! Hash::check($password, $user->password)) {
+        if (! $user?->localAccount || ! Hash::check($password, $user->localAccount->password)) {
             throw ValidationException::withMessages([
                 'email' => [trans('auth.failed')],
             ]);

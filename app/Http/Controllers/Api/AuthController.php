@@ -8,6 +8,7 @@ use App\Http\Resources\User\UserResource;
 use App\Models\PersonalAccessToken;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -32,7 +33,7 @@ class AuthController extends Controller
         if ($token instanceof PersonalAccessToken) {
             $token->delete();
         } else {
-            auth('web')->logout();
+            Auth::logout();
         }
 
         return response()->noContent();

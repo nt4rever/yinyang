@@ -9,7 +9,7 @@ Route::middleware('throttle:10,1')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
 });
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:web,sanctum')->group(function () {
     Route::get('profile', [AuthController::class, 'profile']);
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('upload-avatar', [UserController::class, 'uploadMyAvatar']);

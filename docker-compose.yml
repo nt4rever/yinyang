@@ -13,8 +13,8 @@ services:
   laravel:
     image: yinyang/php-fpm:php8.4
     restart: unless-stopped
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
     volumes:
       - ./docker/php-fpm/php.dev.ini:/usr/local/etc/php/conf.d/99-php.ini
       - ./:/var/www/html
@@ -40,6 +40,7 @@ services:
       PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql
     ports:
       - "5432:5432"
     networks:

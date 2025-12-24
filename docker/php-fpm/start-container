@@ -12,8 +12,8 @@ initialStuff() {
     php artisan migrate --isolated --force || php artisan migrate --force
   fi
 
-  php artisan storage:link
-  php artisan optimize
+  # php artisan storage:link
+  # php artisan optimize
 }
 
 if [ "$1" != "" ]; then

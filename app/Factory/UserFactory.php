@@ -13,7 +13,6 @@ class UserFactory
         $user->id = (string) Str::uuid7();
         $user->name = $name;
         $user->email = $email;
-        $user->password = $password;
         $user->lang = 'en';
         $user->timezone = 'UTC';
         $user->lock_version = 0;

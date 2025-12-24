@@ -5,6 +5,7 @@ namespace Tests\Unit\Models;
 use App\Jobs\UpdatePersonalAccessToken;
 use App\Models\PersonalAccessToken;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -12,6 +13,8 @@ use Tests\TestCase;
 
 class PersonalAccessTokenTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();

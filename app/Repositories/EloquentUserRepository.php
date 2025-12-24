@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Enums\AccountProvider;
 use App\Models\User;
 use App\Repositories\Interfaces\UserReadRepository;
 use App\Repositories\Interfaces\UserWriteRepository;
@@ -45,6 +46,18 @@ class EloquentUserRepository implements UserReadRepository, UserWriteRepository
 
         return $query->latest('id')
             ->paginate(data_get($filters, 'per_page', config('eloquentfilter.paginate_limit')));
+    }
+
+    /**
+     * Find user by provider and provider id
+     */
+    public function findByProviderAndProviderId(AccountProvider $provider, string $providerId): ?User
+    {
+        return User::whereHas(
+            'accounts',
+            fn ($q) => $q->where('provider', $provider)
+                ->where('provider_id', $providerId)
+        )->first();
     }
 
     /**

@@ -97,6 +97,7 @@
 - **Columns**: `user_id`, `email_verified_at` (snake_case)
 - **Foreign Keys**: `user_id`, `token_id`
 - **Pivot Tables**: `user_role`, `model_tag`
+- **Primary Keys**: Use UUIDv7 for all models. Set `public $keyType = 'string'` and `public $incrementing = false` in models. Use `uuid()` in migrations
 
 ## Directory Structure
 ```

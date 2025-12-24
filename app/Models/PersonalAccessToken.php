@@ -65,7 +65,7 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
 
         [$id, $token] = explode('|', $token, 2);
 
-        if (! \Str::isUuid($id)) {
+        if (! \Str::isUuid((string) $id)) {
             return null;
         }
 
