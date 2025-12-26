@@ -69,6 +69,7 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan migrate:fresh --env=testing --ansi",
+            "@php artisan key:generate --env=testing --ansi",
             "@php artisan test --env=testing --coverage-html=coverage"
         ]
     },

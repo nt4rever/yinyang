@@ -18,12 +18,18 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request)
     {
-        $result = $this->authService->login(
+        $user = $this->authService->login(
             $request->email,
             $request->password
         );
 
-        return response()->json($result);
+        Auth::login($user);
+
+        $request->session()->regenerate();
+        $request->session()->regenerateToken();
+        $request->session()->put('tenant_id', $user->tenants()->value('tenants.id'));
+
+        return (new UserResource($request->user()))->setCurrentTenant(current_tenant());
     }
 
     public function logout(Request $request)
@@ -41,6 +47,6 @@ class AuthController extends Controller
 
     public function profile(Request $request)
     {
-        return new UserResource($request->user());
+        return (new UserResource($request->user()))->setCurrentTenant(current_tenant());
     }
 }
