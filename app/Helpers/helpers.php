@@ -11,3 +11,13 @@ if (! function_exists('calculate_cache_ttl')) {
         return random_int($ttl - 30, $ttl + 30);
     }
 }
+
+if (! function_exists('current_tenant')) {
+    /**
+     * Get the current tenant associated with the authenticated user.
+     */
+    function current_tenant(): ?\App\Models\Tenant
+    {
+        return auth()->user()?->currentTenant();
+    }
+}

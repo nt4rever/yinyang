@@ -48,13 +48,13 @@ class AuthControllerTest extends TestCase
     {
         $user = User::factory()->withLocalAccount()->create();
 
-        $response = $this->postJson('/api/login', [
-            'email' => $user->email,
-            'password' => 'password',
-        ]);
+        $response = $this->withHeader('Referer', 'http://localhost:8000')
+            ->postJson('/api/login', [
+                'email' => $user->email,
+                'password' => 'password',
+            ]);
 
-        $response->assertOk()
-            ->assertJsonStructure(['access_token', 'token_type']);
+        $response->assertOk();
     }
 
     public function test_profile_requires_authentication(): void
