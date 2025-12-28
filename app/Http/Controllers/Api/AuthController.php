@@ -29,7 +29,7 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         $request->session()->put('tenant_id', $user->tenants()->value('tenants.id'));
 
-        return (new UserResource($request->user()))->setCurrentTenant(current_tenant());
+        return (new UserResource($request->user()))->setTenant(current_tenant());
     }
 
     public function logout(Request $request)
@@ -47,6 +47,6 @@ class AuthController extends Controller
 
     public function profile(Request $request)
     {
-        return (new UserResource($request->user()))->setCurrentTenant(current_tenant());
+        return (new UserResource($request->user()))->setTenant(current_tenant());
     }
 }

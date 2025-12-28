@@ -3,6 +3,7 @@
 namespace App\Http\Resources\User;
 
 use App\Http\Resources\Tenant\TenantResource;
+use App\Http\Resources\TenantUser\TenantUserResource;
 use App\Models\Tenant;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -12,11 +13,11 @@ use Illuminate\Http\Resources\Json\JsonResource;
  */
 class UserResource extends JsonResource
 {
-    private ?Tenant $currentTenant = null;
+    private ?Tenant $tenant = null;
 
-    public function setCurrentTenant(?Tenant $tenant): self
+    public function setTenant(?Tenant $tenant): self
     {
-        $this->currentTenant = $tenant;
+        $this->tenant = $tenant;
 
         return $this;
     }
@@ -39,10 +40,9 @@ class UserResource extends JsonResource
             'avatar_url' => $this->avatar_url,
         ];
 
-        if ($this->currentTenant) {
-            $data['current_tenant'] = new TenantResource($this->currentTenant);
-            $data['user_type'] = $this->currentTenant->pivot->type;
-            $data['user_status'] = $this->currentTenant->pivot->status;
+        if ($this->tenant) {
+            $data['tenant'] = new TenantResource($this->tenant);
+            $data['tenant_user'] = new TenantUserResource($this->tenant->pivot);
         }
 
         return $data;
