@@ -27,3 +27,11 @@ _ide_helper_models.php
 rr
 .rr.yaml
 /coverage
+# development files
+supervisord.pid
+/public/frankenphp-worker.php
+supervisord.log
+.data
+.config
+frankenphp
+
