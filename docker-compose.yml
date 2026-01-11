@@ -11,12 +11,13 @@ x-healthcheck: &default-healthcheck
 
 services:
   laravel:
-    image: yinyang/php-fpm:php8.4
+    image: yinyang/frankenphp:php8.4
     restart: unless-stopped
-    # env_file:
-    #   - .env
+    env_file:
+      - .env
     volumes:
-      - ./docker/php-fpm/php.dev.ini:/usr/local/etc/php/conf.d/99-php.ini
+      - ./docker/development/php.ini:/usr/local/etc/php/conf.d/99-php.ini
+      - ./docker/development/supervisord.frankenphp.conf:/etc/supervisor/conf.d/supervisord.frankenphp.conf
       - ./:/var/www/html
     ports:
       - "8000:80"
