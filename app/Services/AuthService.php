@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use App\Repositories\CacheableUserRepository;
 use App\Repositories\EloquentUserRepository;
 use Illuminate\Support\Facades\Hash;
@@ -19,7 +20,7 @@ class AuthService
      *
      * @throws ValidationException
      */
-    public function login(string $email, string $password): array
+    public function login(string $email, string $password): User
     {
         $user = $this->userRepository->findOneByEmail($email);
 
@@ -35,12 +36,7 @@ class AuthService
             ]);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return [
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-        ];
+        return $user;
     }
 
     public function verifyEmail(string $id): void

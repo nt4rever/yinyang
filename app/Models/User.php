@@ -11,6 +11,7 @@ use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -130,5 +131,24 @@ class User extends Authenticatable
     public function localAccount(): HasOne
     {
         return $this->accounts()->where('provider', AccountProvider::LOCAL)->one();
+    }
+
+    /**
+     * Get the tenants that the user belongs to.
+     */
+    public function tenants(): BelongsToMany
+    {
+        return $this->belongsToMany(Tenant::class, 'tenant_user', 'user_id', 'tenant_id')
+            ->withPivot('type', 'status')
+            ->withTimestamps()
+            ->using(TenantUser::class);
+    }
+
+    /**
+     * Get the current tenant for the user.
+     */
+    public function currentTenant(): ?Tenant
+    {
+        return $this->tenants()->find(session('tenant_id'));
     }
 }
