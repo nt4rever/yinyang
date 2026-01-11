@@ -13,8 +13,9 @@ services:
   laravel:
     image: yinyang/frankenphp:php8.4
     restart: unless-stopped
-    env_file:
-      - .env
+    environment:
+      WITH_HORIZON: true
+      WITH_SCHEDULER: true
     volumes:
       - ./docker/development/php.ini:/usr/local/etc/php/conf.d/99-php.ini
       - ./docker/development/supervisord.frankenphp.conf:/etc/supervisor/conf.d/supervisord.frankenphp.conf
