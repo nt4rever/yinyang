@@ -5,7 +5,6 @@ namespace Database\Seeders\Test;
 use App\Enums\UploadfileType;
 use App\Models\Uploadfile;
 use App\Models\UploadfilesTreePath;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -24,7 +23,7 @@ class UploadfileSeeder extends Seeder
                     'E1',
                 ],
             ],
-        ]
+        ],
     ];
 
     /**
@@ -53,7 +52,7 @@ class UploadfileSeeder extends Seeder
             $item = Uploadfile::create([
                 'name' => $name,
                 'type' => UploadfileType::FOLDER,
-                'path' => $parent->path . '/' . $name,
+                'path' => $parent->path.'/'.$name,
             ]);
 
             // Self-reference
