@@ -16,7 +16,7 @@ return new class extends Migration
             $table->smallInteger('type');
             $table->string('name');
             $table->string('content_type')->nullable();
-            $table->string('path');
+            $table->string('path')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->foreignUuid('created_by')->nullable();

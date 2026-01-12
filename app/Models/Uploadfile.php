@@ -7,6 +7,7 @@ use App\Traits\HasAudit;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Uploadfile extends Model
@@ -58,6 +59,33 @@ class Uploadfile extends Model
 
     public function parentFolder(): ?Uploadfile
     {
-        return $this->uploadfilesTreePath()->firstWhere('level', 1)?->parentUploadfile;
+        return $this->ancestorUploadfiles()->firstWhere('depth', 1);
+    }
+
+    public function ancestorUploadfiles(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Uploadfile::class,
+            UploadfilesTreePath::class,
+            'descendant_id',
+            'id',
+            'id',
+            'ancestor_id'
+        )
+            ->where('depth', '>', 0)
+            ->latest('depth');
+    }
+
+    public function descendantUploadfiles(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Uploadfile::class,
+            UploadfilesTreePath::class,
+            'ancestor_id',
+            'id',
+            'id',
+            'descendant_id'
+        )
+            ->where('depth', '>', 0);
     }
 }
