@@ -6,6 +6,7 @@ use App\Enums\UploadfileType;
 use App\Models\Uploadfile;
 use App\Services\UploadfileService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class UploadfileServiceTest extends TestCase
@@ -40,6 +41,56 @@ class UploadfileServiceTest extends TestCase
         ], $folderB);
 
         return compact('folderA', 'folderB', 'fileC');
+    }
+
+    /**
+     * Create a complex folder structure.
+     *
+     * @example
+     * ```
+     * Folder A
+     * ├── Folder B
+     * │   ├── Folder C1
+     * │   │   ├── Folder E
+     * │   └── Folder C2
+     * └──---- doc.txt
+     * ```
+     */
+    private function createComplexFolderStructure(): array
+    {
+        $folderA = $this->service->create([
+            'name' => 'Folder A',
+            'type' => UploadfileType::FOLDER,
+        ]);
+
+        $folderB = $this->service->create([
+            'name' => 'Folder B',
+            'type' => UploadfileType::FOLDER,
+        ], $folderA);
+
+        $folderC1 = $this->service->create([
+            'name' => 'Folder C1',
+            'type' => UploadfileType::FOLDER,
+        ], $folderB);
+
+        $folderC2 = $this->service->create([
+            'name' => 'Folder C2',
+            'type' => UploadfileType::FOLDER,
+        ], $folderB);
+
+        $folderE = $this->service->create([
+            'name' => 'Folder E',
+            'type' => UploadfileType::FOLDER,
+        ], $folderC1);
+
+        $fileC = $this->service->create([
+            'name' => 'doc.txt',
+            'content_type' => 'text/plain',
+            'path' => 'doc.txt',
+            'type' => UploadfileType::FILE,
+        ], $folderB);
+
+        return compact('folderA', 'folderB', 'folderC1', 'folderC2', 'folderE', 'fileC');
     }
 
     public function test_create_root_uploadfile(): void
@@ -119,6 +170,96 @@ class UploadfileServiceTest extends TestCase
 
         $this->assertDatabaseHas('uploadfiles', [
             'id' => $folderA->id,
+        ]);
+    }
+
+    #[DataProvider('moveFolderProvider')]
+    public function test_move_uploadfile(array $params, string $expected): void
+    {
+        $data = $this->createComplexFolderStructure();
+
+        $this->service->move($data[$params[0]], $data[$params[1]]);
+
+        $folderPath = $data[$params[0]]->ancestorUploadfiles
+            ->pluck('name')
+            ->implode('/');
+
+        $this->assertEquals($expected, $folderPath);
+    }
+
+    public static function moveFolderProvider(): array
+    {
+        return [
+            'move folder E to folder A' => [
+                'params' => [
+                    'folderE',
+                    'folderA',
+                ],
+                'expected' => 'Folder A',
+            ],
+            'move folder E to folder B' => [
+                'params' => [
+                    'folderE',
+                    'folderB',
+                ],
+                'expected' => 'Folder A/Folder B',
+            ],
+            'move folder C1 to folder A' => [
+                'params' => [
+                    'folderC1',
+                    'folderA',
+                ],
+                'expected' => 'Folder A',
+            ],
+        ];
+    }
+
+    public function test_force_delete_uploadfile(): void
+    {
+        ['folderA' => $folderA, 'folderB' => $folderB, 'fileC' => $fileC] = $this->createFolderStructure();
+
+        $folderBId = $folderB->id;
+        $fileCId = $fileC->id;
+
+        $this->service->forceDelete($folderB);
+
+        $this->assertDatabaseMissing('uploadfiles', [
+            'id' => $folderBId,
+        ]);
+
+        $this->assertDatabaseMissing('uploadfiles', [
+            'id' => $fileCId,
+        ]);
+
+        $this->assertDatabaseHas('uploadfiles', [
+            'id' => $folderA->id,
+        ]);
+    }
+
+    public function test_restore_uploadfile(): void
+    {
+        ['folderA' => $folderA, 'folderB' => $folderB, 'fileC' => $fileC] = $this->createFolderStructure();
+
+        $this->service->delete($folderB);
+
+        $this->assertSoftDeleted('uploadfiles', [
+            'id' => $folderB->id,
+        ]);
+
+        $this->assertSoftDeleted('uploadfiles', [
+            'id' => $fileC->id,
+        ]);
+
+        $this->service->restore($folderB);
+
+        $this->assertDatabaseHas('uploadfiles', [
+            'id' => $folderB->id,
+            'deleted_at' => null,
+        ]);
+
+        $this->assertDatabaseHas('uploadfiles', [
+            'id' => $fileC->id,
+            'deleted_at' => null,
         ]);
     }
 }

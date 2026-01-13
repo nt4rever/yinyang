@@ -10,6 +10,13 @@ use Illuminate\Support\Facades\DB;
 
 class UploadfileService
 {
+    /**
+     * Create a new uploadfile.
+     *
+     * @param  array{name: string, content_type: ?string, path: ?string, type: UploadfileType|int}  $data
+     *
+     * @throws \InvalidArgumentException if parent is not a folder.
+     */
     public function create(array $data, ?Uploadfile $parent = null): Uploadfile
     {
         return DB::transaction(function () use ($data, $parent) {
@@ -32,83 +39,103 @@ class UploadfileService
                     throw new \InvalidArgumentException('Parent must be a folder.');
                 }
 
-                $uploadfile->uploadfilesTreePath()->create([
-                    'ancestor_id' => $parent->id,
+                $paths = $parent->uploadfilesTreePath->map(fn (UploadfilesTreePath $path) => [
+                    'ancestor_id' => $path->ancestor_id,
                     'descendant_id' => $uploadfile->id,
-                    'depth' => 1,
+                    'depth' => $path->depth + 1,
                 ]);
 
-                $parent->uploadfilesTreePath()
-                    ->where('depth', '>', 0)
-                    ->each(function (UploadfilesTreePath $path) use ($uploadfile) {
-                        $uploadfile->uploadfilesTreePath()->create([
-                            'ancestor_id' => $path->ancestor_id,
-                            'descendant_id' => $uploadfile->id,
-                            'depth' => $path->depth + 1,
-                        ]);
-                    });
+                $uploadfile->uploadfilesTreePath()->createMany($paths);
             }
 
             return $uploadfile;
         });
     }
 
+    /**
+     * Delete an uploadfile and all its descendants.
+     */
     public function delete(Uploadfile $uploadfile): bool
     {
         return DB::transaction(function () use ($uploadfile) {
-            $uploadfile->delete();
             $uploadfile->descendantUploadfiles()->delete();
+            $uploadfile->delete();
 
             return true;
         });
     }
 
+    public function forceDelete(Uploadfile $uploadfile): bool
+    {
+        return DB::transaction(function () use ($uploadfile) {
+            $uploadfile->descendantUploadfiles()->withTrashed()->forceDelete();
+            $uploadfile->forceDelete();
+
+            return true;
+        });
+    }
+
+    public function restore(Uploadfile $uploadfile): bool
+    {
+        return DB::transaction(function () use ($uploadfile) {
+            $uploadfile->descendantUploadfiles()
+                ->withTrashed()
+                ->get()
+                ->each(fn (Uploadfile $uploadfile) => $uploadfile->restore());
+
+            $uploadfile->restore();
+
+            return true;
+        });
+    }
+
+    /**
+     * Move an uploadfile to a target folder.
+     */
     public function move(Uploadfile $uploadfile, Uploadfile $targetFolder): bool
     {
         return DB::transaction(function () use ($uploadfile, $targetFolder) {
-            $this->moveToNewParent($uploadfile, $targetFolder);
+            if ($targetFolder->type !== UploadfileType::FOLDER) {
+                throw new \InvalidArgumentException('Target folder must be a folder.');
+            }
+
+            if (UploadfilesTreePath::query()
+                ->where('ancestor_id', $uploadfile->id)
+                ->where('descendant_id', $targetFolder->id)
+                ->exists()) {
+                throw new \InvalidArgumentException('Uploadfile already in target folder.');
+            }
+
+            $this->moveTreePaths($uploadfile->id, $targetFolder->id);
 
             return true;
         });
     }
 
-    private function moveToNewParent(Uploadfile $uploadfile, Uploadfile $targetFolder): void
+    private function moveTreePaths(string $uploadfileId, string $targetFolderId): void
     {
-        if ($targetFolder->type !== UploadfileType::FOLDER) {
-            throw new \InvalidArgumentException('Target must be a folder.');
-        }
-
-        $this->removeOldTreePaths($uploadfile);
-        $this->attachToNewParent($uploadfile, $targetFolder);
-        if ($uploadfile->type === UploadfileType::FOLDER) {
-            $this->moveDescendants($uploadfile);
-        }
-    }
-
-    private function removeOldTreePaths(Uploadfile $uploadfile): void
-    {
-        $uploadfile->uploadfilesTreePath()
-            ->where('depth', '>', 0)
+        UploadfilesTreePath::query()
+            ->where('descendant_id', $uploadfileId)
+            ->where('depth', '!=', 0)
             ->delete();
-    }
 
-    private function attachToNewParent(Uploadfile $uploadfile, Uploadfile $targetFolder): void
-    {
-        $targetFolder->uploadfilesTreePath()
-            ->where('depth', '>', 0)
-            ->each(function (UploadfilesTreePath $path) use ($uploadfile) {
-                $uploadfile->uploadfilesTreePath()->create([
-                    'ancestor_id' => $path->ancestor_id,
-                    'descendant_id' => $uploadfile->id,
-                    'depth' => $path->depth + 1,
-                ]);
-            });
-    }
+        UploadfilesTreePath::query()
+            ->where('descendant_id', $targetFolderId)
+            ->orderBy('depth')
+            ->get()
+            ->map(fn ($path) => UploadfilesTreePath::create([
+                'ancestor_id' => $path->ancestor_id,
+                'descendant_id' => $uploadfileId,
+                'depth' => $path->depth + 1,
+            ]));
 
-    private function moveDescendants(Uploadfile $uploadfile): void
-    {
-        foreach ($uploadfile->descendantUploadfiles as $descendant) {
-            $this->moveToNewParent($descendant, $uploadfile);
+        $children = UploadfilesTreePath::query()
+            ->where('ancestor_id', $uploadfileId)
+            ->where('depth', 1)
+            ->get();
+
+        foreach ($children as $child) {
+            $this->moveTreePaths($child->descendant_id, $uploadfileId);
         }
     }
 }

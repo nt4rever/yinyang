@@ -62,7 +62,7 @@ class Uploadfile extends Model
         return $this->ancestorUploadfiles()->firstWhere('depth', 1);
     }
 
-    public function ancestorUploadfiles(): HasManyThrough
+    public function allAncestorUploadfiles(): HasManyThrough
     {
         return $this->hasManyThrough(
             Uploadfile::class,
@@ -71,12 +71,17 @@ class Uploadfile extends Model
             'id',
             'id',
             'ancestor_id'
-        )
+        );
+    }
+
+    public function ancestorUploadfiles(): HasManyThrough
+    {
+        return $this->allAncestorUploadfiles()
             ->where('depth', '>', 0)
             ->latest('depth');
     }
 
-    public function descendantUploadfiles(): HasManyThrough
+    public function allDescendantUploadfiles(): HasManyThrough
     {
         return $this->hasManyThrough(
             Uploadfile::class,
@@ -85,7 +90,12 @@ class Uploadfile extends Model
             'id',
             'id',
             'descendant_id'
-        )
+        );
+    }
+
+    public function descendantUploadfiles(): HasManyThrough
+    {
+        return $this->allDescendantUploadfiles()
             ->where('depth', '>', 0);
     }
 }
