@@ -21,6 +21,18 @@ class UploadfileServiceTest extends TestCase
         $this->service = new UploadfileService;
     }
 
+    /**
+     * Create a simple folder structure.
+     *
+     * @example
+     * ```
+     * Folder A
+     * └── Folder B
+     *     └── doc.txt
+     * ```
+     *
+     * @return array<string, Uploadfile>
+     */
     private function createFolderStructure(): array
     {
         $folderA = $this->service->create([
@@ -55,6 +67,8 @@ class UploadfileServiceTest extends TestCase
      * │   └── Folder C2
      * └──---- doc.txt
      * ```
+     *
+     * @return array<string, Uploadfile>
      */
     private function createComplexFolderStructure(): array
     {
@@ -238,7 +252,7 @@ class UploadfileServiceTest extends TestCase
 
     public function test_restore_uploadfile(): void
     {
-        ['folderA' => $folderA, 'folderB' => $folderB, 'fileC' => $fileC] = $this->createFolderStructure();
+        ['folderB' => $folderB, 'fileC' => $fileC] = $this->createFolderStructure();
 
         $this->service->delete($folderB);
 
@@ -251,6 +265,45 @@ class UploadfileServiceTest extends TestCase
         ]);
 
         $this->service->restore($folderB);
+
+        $this->assertDatabaseHas('uploadfiles', [
+            'id' => $folderB->id,
+            'deleted_at' => null,
+        ]);
+
+        $this->assertDatabaseHas('uploadfiles', [
+            'id' => $fileC->id,
+            'deleted_at' => null,
+        ]);
+    }
+
+    public function test_restore_returns_true(): void
+    {
+        ['folderB' => $folderB] = $this->createFolderStructure();
+
+        $this->service->delete($folderB);
+
+        $result = $this->service->restore($folderB);
+
+        $this->assertTrue($result);
+    }
+
+    public function test_restore_uploads_tree_paths(): void
+    {
+        ['folderA' => $folderA, 'folderB' => $folderB, 'fileC' => $fileC] = $this->createFolderStructure();
+
+        $this->service->delete($folderA);
+
+        $this->assertSoftDeleted('uploadfiles', [
+            'id' => $folderA->id,
+        ]);
+
+        $this->service->restore($folderB);
+
+        $this->assertDatabaseHas('uploadfiles', [
+            'id' => $folderA->id,
+            'deleted_at' => null,
+        ]);
 
         $this->assertDatabaseHas('uploadfiles', [
             'id' => $folderB->id,

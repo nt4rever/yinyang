@@ -78,12 +78,21 @@ class UploadfileService
     public function restore(Uploadfile $uploadfile): bool
     {
         return DB::transaction(function () use ($uploadfile) {
+            $uploadfile->restore();
+
+            // Restore all children folders and files
             $uploadfile->descendantUploadfiles()
                 ->withTrashed()
+                ->whereNotNull('deleted_at')
                 ->get()
                 ->each(fn (Uploadfile $uploadfile) => $uploadfile->restore());
 
-            $uploadfile->restore();
+            // Restore parent folder path
+            $uploadfile->ancestorUploadfiles()
+                ->withTrashed()
+                ->whereNotNull('deleted_at')
+                ->get()
+                ->each(fn (Uploadfile $uploadfile) => $uploadfile->restore());
 
             return true;
         });
