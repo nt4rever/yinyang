@@ -27,7 +27,7 @@
 
 {$CADDY_SERVER_SERVER_NAME} {
 	log {
-		level WARN
+		level INFO
 
 		format filter {
 			wrap {$CADDY_SERVER_LOGGER}

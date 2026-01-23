@@ -17,8 +17,6 @@ services:
       WITH_HORIZON: true
       WITH_SCHEDULER: true
     volumes:
-      - ./docker/development/php.ini:/usr/local/etc/php/conf.d/99-php.ini
-      - ./docker/development/supervisord.frankenphp.conf:/etc/supervisor/conf.d/supervisord.frankenphp.conf
       - ./:/var/www/html
     ports:
       - "8000:80"
