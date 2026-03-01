@@ -13,7 +13,7 @@ DOCKER_BUILDKIT=1 docker build \
   --pull \
   -f docker/octane/FrankenPHP.Dockerfile \
   --build-arg PHP_VERSION=8.4 \
-  --build-arg FRANKENPHP_VERSION=1.9 \
+  --build-arg FRANKENPHP_VERSION=1.11 \
   --build-arg COMPOSER_VERSION=2.8 \
   --build-arg USER_ID=1000 \
   --build-arg GROUP_ID=1000 \
@@ -60,7 +60,7 @@ DOCKER_BUILDKIT=1 docker buildx build --load \
   --pull \
   -f docker/octane/FrankenPHP.Dockerfile \
   --build-arg PHP_VERSION=8.4 \
-  --build-arg FRANKENPHP_VERSION=1.9 \
+  --build-arg FRANKENPHP_VERSION=1.11 \
   --build-arg COMPOSER_VERSION=2.8 \
   --build-arg USER_ID=1000 \
   --build-arg GROUP_ID=1000 \

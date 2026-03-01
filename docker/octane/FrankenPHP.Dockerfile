@@ -117,6 +117,7 @@ COPY --link docker/octane/supervisord.*.conf /etc/supervisor/conf.d/
 COPY --link docker/octane/start-container /usr/local/bin/start-container
 COPY --link docker/octane/healthcheck /usr/local/bin/healthcheck
 COPY --link docker/octane/php.ini ${PHP_INI_DIR}/conf.d/99-php.ini
+COPY --link docker/octane/Caddyfile /etc/caddy/Caddyfile
 COPY --link composer.* ./
 
 RUN composer install \
