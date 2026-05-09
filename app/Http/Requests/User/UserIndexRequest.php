@@ -3,6 +3,7 @@
 namespace App\Http\Requests\User;
 
 use App\Http\Requests\AbstractIndexRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 class UserIndexRequest extends AbstractIndexRequest
 {
@@ -25,7 +26,7 @@ class UserIndexRequest extends AbstractIndexRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {

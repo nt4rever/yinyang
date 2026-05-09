@@ -7,10 +7,12 @@ use App\Enums\AccountProvider;
 use App\Helpers\CacheKeys;
 use App\Traits\HasAudit;
 use App\Traits\HasOptimisticLocking;
+use Database\Factories\UserFactory;
 use EloquentFilter\Filterable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -30,7 +32,7 @@ class User extends Authenticatable
         Notifiable,
         SoftDeletes;
 
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory;
 
     /**
@@ -88,7 +90,7 @@ class User extends Authenticatable
      *
      * @param  mixed  $value
      * @param  string|null  $field
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @return Model|null
      */
     public function resolveRouteBinding($value, $field = null)
     {

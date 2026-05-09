@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\AccountProvider;
 use App\Traits\HasAudit;
+use Database\Factories\AccountFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Account extends Model
 {
-    /** @use HasFactory<\Database\Factories\AccountFactory> */
+    /** @use HasFactory<AccountFactory> */
     use HasAudit, HasFactory, HasUuids, SoftDeletes;
 
     /**

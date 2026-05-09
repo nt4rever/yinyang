@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources\Json;
 
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection as BaseResourceCollection;
 
 class ResourceCollection extends BaseResourceCollection
@@ -9,8 +11,8 @@ class ResourceCollection extends BaseResourceCollection
     /**
      * Create a paginate-aware HTTP response.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param  Request  $request
+     * @return JsonResponse
      */
     protected function preparePaginatedResponse($request)
     {

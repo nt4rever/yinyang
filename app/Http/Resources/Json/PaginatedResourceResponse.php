@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Json;
 
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\PaginatedResourceResponse as BasePaginatedResourceResponse;
 use Illuminate\Support\Arr;
 
@@ -10,7 +11,7 @@ class PaginatedResourceResponse extends BasePaginatedResourceResponse
     /**
      * Add the pagination information to the response.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  Request  $request
      * @return array
      */
     protected function paginationInformation($request)
