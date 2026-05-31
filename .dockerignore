@@ -37,4 +37,6 @@ frankenphp
 .data
 .git
 .cursor
-
+.claude
+docs
+CLAUDE.md

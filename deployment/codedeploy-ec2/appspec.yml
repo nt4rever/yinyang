@@ -22,22 +22,22 @@ permissions:
       - directory
 hooks:
   ApplicationStop:
-    - location: hooks/stop-services.sh
+    - location: deployment/codedeploy-ec2/hooks/stop-services.sh
       timeout: 60
       runas: ec2-user
   AfterInstall:
-    - location: hooks/env-generate.sh
+    - location: deployment/codedeploy-ec2/hooks/env-generate.sh
       timeout: 60
       runas: ec2-user
-    - location: hooks/cache-generate.sh
+    - location: deployment/codedeploy-ec2/hooks/cache-generate.sh
       timeout: 60
       runas: ec2-user
-    - location: hooks/nginx-restart.sh
+    - location: deployment/codedeploy-ec2/hooks/nginx-restart.sh
       timeout: 60
       runas: ec2-user
-    - location: hooks/php-fpm-restart.sh
+    - location: deployment/codedeploy-ec2/hooks/php-fpm-restart.sh
       timeout: 60
       runas: ec2-user
-    - location: hooks/supervisord-restart.sh
+    - location: deployment/codedeploy-ec2/hooks/supervisord-restart.sh
       timeout: 60
       runas: ec2-user
