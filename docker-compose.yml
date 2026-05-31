@@ -93,6 +93,24 @@ services:
     logging:
       <<: *default-logging
 
+  rustfs-init:
+    image: rustfs/rc:latest
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      until (/usr/bin/rc alias set rustfs http://rustfs:9000 rustfs rustfs123) do echo '...waiting...' && sleep 1; done;
+      /usr/bin/rc mb rustfs/yinyang-files;
+      /usr/bin/rc mb rustfs/test-yinyang-files;
+      echo 'RustFS initialization complete';
+      tail -f /dev/null
+      "
+    networks:
+      - yinyang_network
+    logging:
+      <<: *default-logging
+
   mailpit:
     image: "axllent/mailpit:latest"
     ports:

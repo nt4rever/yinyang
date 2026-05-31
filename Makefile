@@ -15,7 +15,11 @@ help: ## Show this help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z0-9_-]+:.*?## / {printf "  \033[32m%-18s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 env: ## Init env file
-	cp .env.example .env && cp laravel/.env.example laravel/.env
+	cp .env.example .env
+
+install\:deps: ## Install dependencies
+	docker compose ${DC_RUN_ARGS} run --rm laravel composer install
+	docker compose ${DC_RUN_ARGS} run --rm laravel npm install
 
 up: ## Up containers
 	docker compose ${DC_RUN_ARGS} up -d --remove-orphans
