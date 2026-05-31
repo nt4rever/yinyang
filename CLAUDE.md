@@ -65,6 +65,8 @@ This project has domain-specific skills available. You MUST activate the relevan
 ## Artisan
 
 - Use the `list-artisan-commands` tool when you need to call an Artisan command to double-check the available parameters.
+- If running `php artisan` directly fails because of the local environment, run it in Docker with `make command:laravel command="php artisan ..."`.
+- When route, config, view, or application cache may be stale, clear it with `php artisan optimize:clear`; use `make command:laravel command="php artisan optimize:clear"` when Docker is needed.
 
 ## URLs
 
