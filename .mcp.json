@@ -1,10 +1,10 @@
 {
     "mcpServers": {
         "laravel-boost": {
-            "command": "php",
+            "command": "make",
             "args": [
-                "artisan",
-                "boost:mcp"
+                "command:laravel",
+                "command=php artisan boost:mcp"
             ]
         }
     }
