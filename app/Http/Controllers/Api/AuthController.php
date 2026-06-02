@@ -9,6 +9,7 @@ use App\Models\PersonalAccessToken;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -24,6 +25,22 @@ class AuthController extends Controller
         );
 
         return response()->json($result);
+    }
+
+    public function redirectToKeycloak()
+    {
+        return response()->json([
+            'redirect_url' => Socialite::driver('keycloak')->stateless()->redirect()->getTargetUrl(),
+        ]);
+    }
+
+    public function handleKeycloakCallback()
+    {
+        return response()->json(
+            $this->authService->loginWithKeycloak(
+                Socialite::driver('keycloak')->stateless()->user()
+            )
+        );
     }
 
     public function logout(Request $request)

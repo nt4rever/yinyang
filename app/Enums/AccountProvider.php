@@ -6,6 +6,7 @@ enum AccountProvider: string
 {
     case LOCAL = 'local';
     case GOOGLE = 'google';
+    case KEYCLOAK = 'keycloak';
 
     /**
      * Check if provider requires OAuth
