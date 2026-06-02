@@ -32,9 +32,11 @@ ENV DEBIAN_FRONTEND=noninteractive \
     TERM=xterm-color \
     OCTANE_SERVER=frankenphp \
     TZ=${TZ} \
+    LANG=C.UTF-8 \
     USER=laravel \
     ROOT=/var/www/html \
     APP_ENV=production \
+    COMPOSER_ALLOW_SUPERUSER=1 \
     COMPOSER_FUND=0 \
     COMPOSER_MAX_PARALLEL_HTTP=48 \
     WITH_HORIZON=false \
@@ -139,9 +141,6 @@ RUN mkdir -p \
     storage/framework/{sessions,views,cache,testing} \
     storage/logs \
     bootstrap/cache \
-    ${ROOT}/.data \
-    ${ROOT}/.config \
-    && chown -R ${USER_ID}:${GROUP_ID} ${ROOT}/storage ${ROOT}/bootstrap/cache ${ROOT}/.data ${ROOT}/.config \
     && chmod +x /usr/local/bin/start-container /usr/local/bin/healthcheck
 
 RUN composer dump-autoload \
@@ -150,6 +149,9 @@ RUN composer dump-autoload \
     --apcu
 
 RUN npm run build
+
+RUN chown -R ${USER_ID}:${GROUP_ID} ${ROOT} \
+    && find / -perm /6000 -type f -exec chmod a-s {} + 2>/dev/null || true
 
 USER ${USER}
 
