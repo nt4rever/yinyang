@@ -42,6 +42,8 @@ return [
         'base_url' => env('KEYCLOAK_BASE_URL'),
         'realms' => env('KEYCLOAK_REALM', 'yinyang'),
         'public_realm_url' => rtrim((string) env('KEYCLOAK_BASE_URL'), '/').'/realms/'.env('KEYCLOAK_REALM', 'yinyang'),
+        'issuer' => rtrim((string) env('KEYCLOAK_BASE_URL'), '/').'/realms/'.env('KEYCLOAK_REALM', 'yinyang'),
+        'jwks_url' => rtrim((string) env('KEYCLOAK_BASE_URL'), '/').'/realms/'.env('KEYCLOAK_REALM', 'yinyang').'/protocol/openid-connect/certs',
     ],
 
 ];

@@ -9,6 +9,7 @@ Route::middleware('throttle:20,1')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
     Route::get('auth/keycloak/redirect', [AuthController::class, 'redirectToKeycloak']);
     Route::get('auth/keycloak/callback', [AuthController::class, 'handleKeycloakCallback']);
+    Route::post('auth/keycloak/backchannel-logout', [AuthController::class, 'backchannelLogout']);
 });
 
 Route::middleware('auth:web,sanctum')->group(function () {

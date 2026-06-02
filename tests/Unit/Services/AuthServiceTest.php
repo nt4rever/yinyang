@@ -33,6 +33,9 @@ class AuthServiceTest extends TestCase
             'provider' => AccountProvider::KEYCLOAK->value,
             'provider_id' => 'keycloak-subject-1',
         ]);
+        $this->assertDatabaseHas('personal_access_tokens', [
+            'keycloak_session_id' => 'keycloak-session-1',
+        ]);
         $this->assertDatabaseCount('personal_access_tokens', 1);
     }
 
@@ -99,6 +102,7 @@ class AuthServiceTest extends TestCase
             'email_verified' => true,
             'name' => 'Keycloak User',
             'preferred_username' => 'keycloak-user',
+            'sid' => 'keycloak-session-1',
         ])->map([
             'id' => $id,
             'nickname' => 'keycloak-user',

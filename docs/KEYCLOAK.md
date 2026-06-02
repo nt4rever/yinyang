@@ -63,6 +63,13 @@ http://host.docker.internal:8000
 http://localhost:8000
 ```
 
+Enable backchannel logout for the client:
+
+```text
+Backchannel logout: On
+Backchannel logout URL: http://host.docker.internal:8000/api/v1/auth/keycloak/backchannel-logout
+```
+
 After saving the client, copy the client secret from the `Credentials` tab.
 
 ## 4. Configure Laravel Environment
@@ -76,6 +83,7 @@ KEYCLOAK_REALM=yinyang
 KEYCLOAK_CLIENT_ID=yinyang-api
 KEYCLOAK_CLIENT_SECRET=<copy-from-keycloak-client-credentials>
 KEYCLOAK_REDIRECT_URI=http://host.docker.internal:8000/api/v1/auth/keycloak/callback
+KEYCLOAK_BACKCHANNEL_LOGOUT_URI=http://host.docker.internal:8000/api/v1/auth/keycloak/backchannel-logout
 ```
 
 Clear Laravel config and route cache after changing `.env`:
@@ -115,7 +123,7 @@ Open the returned `redirect_url` in the browser, log in with the Keycloak user, 
 /api/v1/auth/keycloak/callback
 ```
 
-Laravel will create or link the local user account and return a Sanctum bearer token:
+Laravel will create or link the local user account and return a Sanctum bearer token. The token is linked to Keycloak's `sid` claim so Keycloak backchannel logout can revoke it later:
 
 ```json
 {

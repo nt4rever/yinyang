@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\AccountProvider;
 use App\Http\Resources\User\UserResource;
+use App\Models\PersonalAccessToken;
 use App\Models\User;
 use App\Repositories\CacheableUserRepository;
 use App\Repositories\EloquentUserRepository;
@@ -83,10 +84,23 @@ class AuthService
         $this->cacheableUserRepository->flush($user);
 
         return [
-            'access_token' => $user->createToken('auth_token')->plainTextToken,
+            'access_token' => $this->createKeycloakToken($user, $keycloakUser),
             'token_type' => 'Bearer',
-            'user' => new UserResource($user),
         ];
+    }
+
+    private function createKeycloakToken(User $user, SocialiteUser $keycloakUser): string
+    {
+        $newAccessToken = $user->createToken('auth_token');
+        $rawKeycloakUser = method_exists($keycloakUser, 'getRaw') ? $keycloakUser->getRaw() : [];
+
+        if ($newAccessToken->accessToken instanceof PersonalAccessToken) {
+            $newAccessToken->accessToken
+                ->forceFill(['keycloak_session_id' => data_get($rawKeycloakUser, 'sid')])
+                ->saveQuietly();
+        }
+
+        return $newAccessToken->plainTextToken;
     }
 
     private function resolveKeycloakUser(string $providerId, string $email): User
