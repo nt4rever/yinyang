@@ -12,7 +12,7 @@ class AuthControllerTest extends TestCase
 
     public function test_login_requires_email_and_password(): void
     {
-        $response = $this->postJson('/api/login');
+        $response = $this->postJson('/api/v1/login');
 
         $response->assertUnprocessable()
             ->assertJsonValidationErrors(['email', 'password']);
@@ -22,7 +22,7 @@ class AuthControllerTest extends TestCase
     {
         $user = User::factory()->withLocalAccount()->create();
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/login', [
             'email' => $user->email,
             'password' => 'wrong-password',
         ]);
@@ -35,7 +35,7 @@ class AuthControllerTest extends TestCase
     {
         $user = User::factory()->unverified()->withLocalAccount()->create();
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/login', [
             'email' => $user->email,
             'password' => 'password',
         ]);
@@ -48,7 +48,7 @@ class AuthControllerTest extends TestCase
     {
         $user = User::factory()->withLocalAccount()->create();
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/v1/login', [
             'email' => $user->email,
             'password' => 'password',
         ]);
@@ -59,7 +59,7 @@ class AuthControllerTest extends TestCase
 
     public function test_profile_requires_authentication(): void
     {
-        $response = $this->getJson('/api/profile');
+        $response = $this->getJson('/api/v1/profile');
 
         $response->assertUnauthorized();
     }
@@ -68,7 +68,7 @@ class AuthControllerTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->getJson('/api/profile');
+        $response = $this->actingAs($user)->getJson('/api/v1/profile');
 
         $response->assertOk()
             ->assertJson([
@@ -81,7 +81,7 @@ class AuthControllerTest extends TestCase
 
     public function test_logout_requires_authentication(): void
     {
-        $response = $this->postJson('/api/logout');
+        $response = $this->postJson('/api/v1/logout');
 
         $response->assertUnauthorized();
     }
@@ -92,7 +92,7 @@ class AuthControllerTest extends TestCase
         $token = $user->createToken('auth_token')->plainTextToken;
 
         $response = $this->withHeader('Authorization', "Bearer {$token}")
-            ->postJson('/api/logout');
+            ->postJson('/api/v1/logout');
 
         $response->assertNoContent();
         $this->assertDatabaseCount('personal_access_tokens', 0);
