@@ -22,6 +22,20 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - phpunit/phpunit (PHPUNIT) - v11
 - tailwindcss (TAILWINDCSS) - v4
 
+## Local Development (Docker)
+
+This application runs inside Docker. On local development, do not run `php artisan`, Composer, PHPUnit, or Pint directly on the host unless the user explicitly asks otherwise.
+
+Use the Makefile target `command:laravel` to run commands in the `laravel` container:
+
+```bash
+make command:laravel command="php artisan migrate"
+make command:laravel command="php artisan test --compact --filter=ExampleTest"
+make command:laravel command="vendor/bin/pint --dirty"
+```
+
+The `command` variable is passed to `docker compose exec laravel sh -c "..."` (see `Makefile` target `command:laravel`).
+
 ## Skills Activation
 
 This project has domain-specific skills available. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
@@ -65,8 +79,8 @@ This project has domain-specific skills available. You MUST activate the relevan
 ## Artisan
 
 - Use the `list-artisan-commands` tool when you need to call an Artisan command to double-check the available parameters.
-- If running `php artisan` directly fails because of the local environment, run it in Docker with `make command:laravel command="php artisan ..."`.
-- When route, config, view, or application cache may be stale, clear it with `php artisan optimize:clear`; use `make command:laravel command="php artisan optimize:clear"` when Docker is needed.
+- For local development, run Artisan in Docker: `make command:laravel command="php artisan ..."`.
+- When route, config, view, or application cache may be stale, clear it with `make command:laravel command="php artisan optimize:clear"`.
 
 ## URLs
 
@@ -140,7 +154,7 @@ protected function isAccessible(User $user, ?string $path = null): bool
 # Test Enforcement
 
 - Every change must be programmatically tested. Write a new test or update an existing test, then run the affected tests to make sure they pass.
-- Run the minimum number of tests needed to ensure code quality and speed. Use `php artisan test --compact` with a specific filename or filter.
+- Run the minimum number of tests needed to ensure code quality and speed. Use `make command:laravel command="php artisan test --compact ..."` with a specific filename or filter.
 
 === laravel/core rules ===
 
@@ -226,8 +240,8 @@ protected function isAccessible(User $user, ?string $path = null): bool
 
 # Laravel Pint Code Formatter
 
-- You must run `vendor/bin/pint --dirty --format agent` before finalizing changes to ensure your code matches the project's expected style.
-- Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` to fix any formatting issues.
+- You must run Pint before finalizing changes. On local development use `make command:laravel command="vendor/bin/pint --dirty --format agent"`.
+- Do not run `vendor/bin/pint --test --format agent`, simply run `vendor/bin/pint --format agent` (via `make command:laravel` locally) to fix any formatting issues.
 
 === phpunit/core rules ===
 
@@ -243,9 +257,9 @@ protected function isAccessible(User $user, ?string $path = null): bool
 ## Running Tests
 
 - Run the minimal number of tests, using an appropriate filter, before finalizing.
-- To run all tests: `php artisan test --compact`.
-- To run all tests in a file: `php artisan test --compact tests/Feature/ExampleTest.php`.
-- To filter on a particular test name: `php artisan test --compact --filter=testName` (recommended after making a change to a related file).
+- To run all tests: `make command:laravel command="php artisan test --compact"`.
+- To run all tests in a file: `make command:laravel command="php artisan test --compact tests/Feature/ExampleTest.php"`.
+- To filter on a particular test name: `make command:laravel command="php artisan test --compact --filter=testName"` (recommended after making a change to a related file).
 
 === tailwindcss/core rules ===
 

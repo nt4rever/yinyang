@@ -26,5 +26,6 @@ class MetricsControllerTest extends TestCase
 
         $response->assertOk();
         $this->assertStringContainsString('app_request_count', $response->getContent());
+        $this->assertStringContainsString('app_request_duration_seconds', $response->getContent());
     }
 }
