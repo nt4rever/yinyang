@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Prometheus\Adapters\LaravelCacheAdapter;
+use App\Prometheus\PrometheusMetricsRegistrar;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
 use Prometheus\CollectorRegistry;
@@ -22,6 +23,8 @@ class PrometheusServiceProvider extends ServiceProvider
                 false
             );
         });
+
+        $this->app->singleton(PrometheusMetricsRegistrar::class);
     }
 
     /**

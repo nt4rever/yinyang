@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Prometheus\Prom;
+use App\Prometheus\Facades\Prometheus;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -39,14 +39,14 @@ class CountRequestMetric
         ];
 
         try {
-            Prom::getOrRegisterCounter(
+            Prometheus::getOrRegisterCounter(
                 config('prometheus.default_namespace'),
                 'request_count',
                 'Total number of HTTP requests',
                 ['method', 'route', 'status'],
             )->inc($labels);
 
-            Prom::getOrRegisterHistogram(
+            Prometheus::getOrRegisterHistogram(
                 config('prometheus.default_namespace'),
                 'request_duration_seconds',
                 'HTTP request duration in seconds',
