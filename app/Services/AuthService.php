@@ -2,10 +2,17 @@
 
 namespace App\Services;
 
+use App\Enums\AccountProvider;
+use App\Http\Resources\User\UserResource;
+use App\Models\PersonalAccessToken;
+use App\Models\User;
 use App\Repositories\CacheableUserRepository;
 use App\Repositories\EloquentUserRepository;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Laravel\Socialite\Contracts\User as SocialiteUser;
 
 class AuthService
 {
@@ -41,6 +48,71 @@ class AuthService
             'access_token' => $token,
             'token_type' => 'Bearer',
         ];
+    }
+
+    public function loginWithKeycloak(SocialiteUser $keycloakUser): array
+    {
+        $providerId = (string) $keycloakUser->getId();
+        $email = $keycloakUser->getEmail();
+
+        if ($providerId === '' || ! $email) {
+            throw ValidationException::withMessages([
+                'keycloak' => [trans('auth.failed')],
+            ]);
+        }
+
+        $user = DB::transaction(function () use ($keycloakUser, $providerId, $email) {
+            $user = $this->resolveKeycloakUser($providerId, $email);
+
+            $user->name = $keycloakUser->getName() ?: $keycloakUser->getNickname() ?: $email;
+            $rawKeycloakUser = method_exists($keycloakUser, 'getRaw') ? $keycloakUser->getRaw() : [];
+
+            if (! $user->email_verified_at && data_get($rawKeycloakUser, 'email_verified')) {
+                $user->email_verified_at = Carbon::now();
+            }
+
+            $this->userRepository->save($user);
+
+            $user->accounts()->firstOrCreate([
+                'provider' => AccountProvider::KEYCLOAK,
+                'provider_id' => $providerId,
+            ]);
+
+            return $user;
+        });
+
+        $this->cacheableUserRepository->flush($user);
+
+        return [
+            'access_token' => $this->createKeycloakToken($user, $keycloakUser),
+            'token_type' => 'Bearer',
+        ];
+    }
+
+    private function createKeycloakToken(User $user, SocialiteUser $keycloakUser): string
+    {
+        $newAccessToken = $user->createToken('auth_token');
+        $rawKeycloakUser = method_exists($keycloakUser, 'getRaw') ? $keycloakUser->getRaw() : [];
+
+        if ($newAccessToken->accessToken instanceof PersonalAccessToken) {
+            $newAccessToken->accessToken
+                ->forceFill(['keycloak_session_id' => data_get($rawKeycloakUser, 'sid')])
+                ->saveQuietly();
+        }
+
+        return $newAccessToken->plainTextToken;
+    }
+
+    private function resolveKeycloakUser(string $providerId, string $email): User
+    {
+        $user = $this->userRepository->findByProviderAndProviderId(AccountProvider::KEYCLOAK, $providerId)
+            ?? $this->userRepository->findOneByEmail($email);
+        if (! $user) {
+            $user = new User;
+            $user->email = $email;
+        }
+
+        return $user;
     }
 
     public function verifyEmail(string $id): void

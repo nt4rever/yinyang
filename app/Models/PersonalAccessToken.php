@@ -14,6 +14,19 @@ class PersonalAccessToken extends SanctumPersonalAccessToken
     use HasUuids;
 
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'token',
+        'abilities',
+        'expires_at',
+        'keycloak_session_id',
+    ];
+
+    /**
      * Boot the model.
      */
     public static function boot()
