@@ -97,4 +97,46 @@ class AuthControllerTest extends TestCase
         $response->assertNoContent();
         $this->assertDatabaseCount('personal_access_tokens', 0);
     }
+
+    public function test_login_throttled_by_email_and_ip(): void
+    {
+        $user = User::factory()->withLocalAccount()->create();
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->postJson('/api/v1/login', [
+                'email' => $user->email,
+                'password' => 'wrong-password',
+            ]);
+        }
+
+        $response = $this->postJson('/api/v1/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+
+        $response->assertTooManyRequests();
+    }
+
+    public function test_login_throttle_separates_by_email(): void
+    {
+        $userA = User::factory()->withLocalAccount()->create();
+        $userB = User::factory()->withLocalAccount()->create();
+
+        for ($i = 0; $i < 5; $i++) {
+            $this->postJson('/api/v1/login', [
+                'email' => $userA->email,
+                'password' => 'wrong-password',
+            ]);
+        }
+
+        $this->postJson('/api/v1/login', [
+            'email' => $userA->email,
+            'password' => 'wrong-password',
+        ])->assertTooManyRequests();
+
+        $this->postJson('/api/v1/login', [
+            'email' => $userB->email,
+            'password' => 'wrong-password',
+        ])->assertUnprocessable();
+    }
 }

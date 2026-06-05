@@ -5,7 +5,7 @@ use App\Http\Controllers\Api\UploadfileController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('throttle:10,1')->group(function () {
+Route::middleware('throttle:login')->group(function () {
     Route::post('login', [AuthController::class, 'login']);
 });
 
