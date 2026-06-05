@@ -9,8 +9,10 @@
 
 	frankenphp {
 		worker {
-			file "{$APP_PUBLIC_PATH}/frankenphp-worker.php" {$CADDY_SERVER_WORKER_COUNT}
+			file "{$APP_PUBLIC_PATH}/frankenphp-worker.php"
+			num 1
 			watch
+			env MAX_REQUESTS 1
 		}
 	}
 
