@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\MetricsAuth;
 use App\Prometheus\Facades\Prometheus;
 use App\Prometheus\PrometheusMetricsRegistrar;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Attributes\Controllers\Middleware;
 use Prometheus\RenderTextFormat;
 
+#[Middleware(MetricsAuth::class)]
 class MetricsController extends Controller
 {
     public function __construct(

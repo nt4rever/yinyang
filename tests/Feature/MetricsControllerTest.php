@@ -41,4 +41,22 @@ class MetricsControllerTest extends TestCase
         $this->assertStringContainsString('app_queue_reserved_jobs', $response->getContent());
         $this->assertStringContainsString('app_queue_size', $response->getContent());
     }
+
+    public function test_metrics_requires_token_when_configured(): void
+    {
+        config(['prometheus.metrics_token' => 'secret-token']);
+
+        $response = $this->get('/metrics');
+
+        $response->assertUnauthorized();
+    }
+
+    public function test_metrics_grants_access_with_valid_token(): void
+    {
+        config(['prometheus.metrics_token' => 'secret-token']);
+
+        $response = $this->get('/metrics', ['Authorization' => 'Bearer secret-token']);
+
+        $response->assertOk();
+    }
 }

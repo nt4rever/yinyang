@@ -34,4 +34,10 @@ return [
      *  'cache' => 'array'    // InMemory implementation using laravel cache
      */
     'cache' => config('cache.default'),
+
+    /*
+     * Bearer token for the /metrics endpoint.
+     * Set to null to disable authentication.
+     */
+    'metrics_token' => env('PROMETHEUS_METRICS_TOKEN', null),
 ];
