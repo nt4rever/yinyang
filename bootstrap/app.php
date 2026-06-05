@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CountRequestMetric;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append([
             SetLocale::class,
+            CountRequestMetric::class,
         ]);
         $middleware->throttleApi('api', true);
         $middleware->trustProxies(at: '*');

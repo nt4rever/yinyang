@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Prometheus\Collectors\Queue;
+
+use App\Prometheus\Collectors\Collector;
+use App\Prometheus\Facades\Prometheus;
+use Exception;
+use Illuminate\Contracts\Queue\Factory;
+
+class QueueSizeCollector implements Collector
+{
+    protected string $connection;
+
+    /** @var array<int, string> */
+    protected array $queues;
+
+    /**
+     * @param  array<int, string>  $queues
+     */
+    public function __construct(?string $connection = null, array $queues = [])
+    {
+        $this->connection = $connection ?? config('queue.default');
+        $this->queues = $queues === []
+            ? [config("queue.connections.{$this->connection}.queue", 'default')]
+            : $queues;
+    }
+
+    public function register(): void
+    {
+        $manager = app(Factory::class);
+
+        foreach ($this->queues as $queueName) {
+            try {
+                $queueConnection = $manager->connection($this->connection);
+                $size = $queueConnection->size($queueName);
+            } catch (Exception) {
+                $size = 0;
+            }
+
+            Prometheus::getOrRegisterGauge(
+                config('prometheus.default_namespace'),
+                'queue_size',
+                'The total number of jobs in the queue',
+                ['connection', 'queue'],
+            )->set($size, [$this->connection, $queueName]);
+        }
+    }
+}

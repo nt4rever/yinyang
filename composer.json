@@ -20,6 +20,7 @@
         "laravel/tinker": "^3.0",
         "league/flysystem-aws-s3-v3": "^3.29",
         "predis/predis": "^3.2",
+        "promphp/prometheus_client_php": "^2.15",
         "tucker-eric/eloquentfilter": "^3.5"
     },
     "require-dev": {
