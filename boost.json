@@ -1,18 +1,17 @@
 {
     "agents": [
         "cursor",
-        "claude_code"
+        "claude_code",
+        "opencode"
     ],
+    "cloud": false,
     "guidelines": true,
-    "herd_mcp": false,
     "mcp": true,
-    "packages": [
-        "laravel/octane",
-        "laravel/horizon"
-    ],
+    "nightwatch": false,
     "sail": false,
     "skills": [
-        "tailwindcss-development",
-        "configuring-horizon"
+        "laravel-best-practices",
+        "configuring-horizon",
+        "tailwindcss-development"
     ]
 }
