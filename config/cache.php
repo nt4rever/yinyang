@@ -107,14 +107,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Cache Serializable Classes
+    | Serializable Classes
     |--------------------------------------------------------------------------
     |
-    | This option controls which classes may be unserialized from the cache.
-    | Setting this value to false prevents unserializing cached PHP objects.
+    | This value determines the classes that can be unserialized from cache
+    | storage. By default, no PHP classes will be unserialized from your
+    | cache to prevent gadget chain attacks if your APP_KEY is leaked.
     |
     */
 
-    'serializable_classes' => false,
+    'serializable_classes' => [
+        App\Models\User::class,
+        App\Models\PersonalAccessToken::class,
+    ],
 
 ];

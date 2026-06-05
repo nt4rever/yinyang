@@ -1,11 +1,7 @@
 <?php
 
-use App\Providers\AppServiceProvider;
-use App\Providers\HorizonServiceProvider;
-use EloquentFilter\ServiceProvider;
-
 return [
-    AppServiceProvider::class,
-    HorizonServiceProvider::class,
-    ServiceProvider::class,
+    App\Providers\AppServiceProvider::class,
+    App\Providers\HorizonServiceProvider::class,
+    EloquentFilter\ServiceProvider::class,
 ];
