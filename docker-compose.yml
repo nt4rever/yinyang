@@ -27,7 +27,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
+      valkey:
         condition: service_healthy
 
   postgres:
@@ -51,17 +51,17 @@ services:
     logging:
       <<: *default-logging
 
-  redis:
-    image: redis:7.4.0-alpine
+  valkey:
+    image: valkey/valkey:8.1.8-alpine
     restart: unless-stopped
     volumes:
-      - redis_data:/data
+      - valkey_data:/data
     ports:
       - "6379:6379"
     networks:
       - yinyang_network
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: ["CMD", "valkey-cli", "ping"]
       <<: *default-healthcheck
     logging:
       <<: *default-logging
@@ -124,7 +124,7 @@ services:
 volumes:
   postgres_data:
     driver: local
-  redis_data:
+  valkey_data:
     driver: local
   rustfs_data:
     driver: local

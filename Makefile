@@ -50,16 +50,13 @@ ps: ## Containers status
 
 build: ## Build images
 	DOCKER_BUILDKIT=1 docker buildx bake \
-		--allow=fs=/tmp/docker-cache \
 		--load
 
 build\:laravel: ## Build laravel images
 	DOCKER_BUILDKIT=1 docker buildx build --load \
 		--pull \
-		-f docker/php-fpm/Dockerfile \
-		--cache-to=type=local,dest=/tmp/docker-cache \
-		--cache-from=type=local,src=/tmp/docker-cache \
-		-t yinyang/php-fpm:php8.4 \
+		-f docker/development/FrankenPHP.Dockerfile \
+		-t yinyang/frankenphp:php8.4 \
 		.
 
 update: ## Update containers

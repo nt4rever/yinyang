@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Middleware\SetLocale;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -22,11 +21,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->throttleApi('api', true);
         $middleware->trustProxies(at: '*');
         $middleware->statefulApi();
+        $middleware->redirectGuestsTo(fn (Request $request): ?string => $request->is('api/*') ? null : '/');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(fn (Request $request): bool => $request->is('api/*') || $request->expectsJson());
         $exceptions->renderable(function (NotFoundHttpException $e, Request $request) {
-            if ($request->expectsJson() && $e->getPrevious() instanceof ModelNotFoundException) {
+            if ($request->is('api/*')) {
                 return response()->json([
                     'message' => trans('Resource not found.'),
                 ], 404);

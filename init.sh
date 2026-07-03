@@ -10,7 +10,7 @@ fi
 
 [ ! -f .env ] && cp .env.example .env
 
-DOCKER_BUILDKIT=1 docker buildx bake --allow=fs=/tmp/docker-cache --load
+DOCKER_BUILDKIT=1 docker buildx bake --load
 
 docker compose ${DC_RUN_ARGS} run --rm laravel composer install --no-interaction --prefer-dist
 docker compose ${DC_RUN_ARGS} run --rm laravel npm install
@@ -23,9 +23,5 @@ fi
 
 docker compose ${DC_RUN_ARGS} exec -T laravel php artisan migrate --isolated --force || \
 docker compose ${DC_RUN_ARGS} exec -T laravel php artisan migrate --force
-
-docker compose ${DC_RUN_ARGS} exec -T laravel php artisan storage:link --force 2>/dev/null || true
-
-docker compose ${DC_RUN_ARGS} exec -T laravel php artisan optimize
 
 echo "Application started at http://localhost:8000"

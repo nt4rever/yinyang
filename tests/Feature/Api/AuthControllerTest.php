@@ -64,6 +64,16 @@ class AuthControllerTest extends TestCase
         $response->assertUnauthorized();
     }
 
+    public function test_profile_requires_authentication_without_redirecting_to_login_route(): void
+    {
+        $response = $this->get('/api/v1/profile');
+
+        $response->assertUnauthorized()
+            ->assertJson([
+                'message' => 'Unauthenticated.',
+            ]);
+    }
+
     public function test_profile_returns_authenticated_user(): void
     {
         $user = User::factory()->create();

@@ -116,7 +116,8 @@ COPY --link --from=vendor /usr/bin/composer /usr/bin/composer
 COPY --link docker/octane/supervisord.conf /etc/
 COPY --link docker/octane/supervisord.*.conf /etc/supervisor/conf.d/
 COPY --link docker/octane/start-container /usr/local/bin/start-container
-COPY --link docker/octane/healthcheck /usr/local/bin/healthcheck
+COPY --link docker/development/supervisord.frankenphp.conf /etc/supervisor/conf.d/supervisord.frankenphp.conf
+COPY --link docker/development/healthcheck /usr/local/bin/healthcheck
 COPY --link docker/development/php.ini ${PHP_INI_DIR}/conf.d/99-php.ini
 COPY --link docker/development/Caddyfile /etc/caddy/Caddyfile
 COPY --link composer.* ./
